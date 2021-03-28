@@ -796,6 +796,7 @@ if __name__ == "__main__":
         # Extract and define the name of the file as well as its derived names
         tutPathName = str(sys.argv[1])
         tutPath = os.path.dirname(tutPathName)
+        print("check:", tutPathName, tutPath)
         if tutPath.split("/")[-2] == "tutorials":
             tutRelativePath = "$ROOTSYS/tutorials/%s/" % tutPath.split("/")[-1]
         tutFileName = os.path.basename(tutPathName)
