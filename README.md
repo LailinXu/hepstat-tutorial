@@ -7,6 +7,7 @@
 * [Statistical methods in LHC data analysis](http://indico.cern.ch/event/73545/) - Luca Lista
 
 ### ROOT and RooFit
+* ROOT [Users Guides](https://root.cern/root/htmldoc/guides/users-guide/ROOTUsersGuide.html)
 * ROOT Tutorials, 2015, https://twiki.cern.ch/twiki/bin/view/Main/ROOTRioTutorial 
 * [RooFit reference slides](http://indico.in2p3.fr/materialDisplay.py?contribId=15&materialId=slides&confId=750) - by Wouter Verkerke, one of RooFit authors
 * [RooFit tutorials](http://root.cern.ch/root/html/tutorials/roofit/index.html) - a set of working macros that showcase all major features of RooFit
