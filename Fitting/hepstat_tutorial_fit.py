@@ -1,7 +1,10 @@
 ## \file
 ## \ingroup tutorial_pyroot
 ## \notebook
-## Fit example.
+## Fit example with ROOT, with following objectives:
+##  * Fit a histogram with a linear chi-squre fit, and compare results with by-hand calculations
+##  * Different fiting options
+##  * Compare chi-squre fit and likelihood fit
 ##
 ## \macro_image
 ## \macro_output
