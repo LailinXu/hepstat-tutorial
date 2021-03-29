@@ -27,6 +27,7 @@ nbins, xmin, xmax = 100, 110, 130
 h_m4l = R.TH1F(hname, hname, nbins, xmin, xmax)
 h_m4l.Sumw2()
 
+# Loop all events
 nevt_max = min(nevents, 1000)
 for ie in range(nevt_max):
   tr.GetEntry(ie)
@@ -45,14 +46,17 @@ for ie in range(nevt_max):
   tlz_4l = R.TLorentzVector()
   for tlz in tlz_leps: tlz_4l += tlz
 
+  # the invariant mass
   m4l = tlz_4l.M()*1e-3 # MeV -> GeV
   h_m4l.Fill(m4l, wt)
 
+# Plotting
 myc = R.TCanvas("c", "c", 800, 600)
 myc.SetFillColor(0)
 
 myc.cd()
 h_m4l.Draw()
+myc.Draw()
 myc.SaveAs("m4l_test.png")
 
 tfin.Close()
