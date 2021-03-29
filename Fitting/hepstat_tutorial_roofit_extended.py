@@ -1,9 +1,11 @@
 ## \file
 ## \ingroup tutorial_pyroot
 ## \notebook
-## Fit examples with RooFit, composite p.d.f with signal and background component
+## Fit examples with RooFit, composite p.d.f with signal and background component, extended
 ## ```
-## pdf = f_bkg * bkg(x,a0,a1) + (1-fbkg) * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * sig2(x,m,s2)))
+## pdf = n_bkg * bkg(x,a0,a1) + n_sig * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * sig2(x,m,s2)))
+## or using a signal strength
+## pdf = n_bkg * bkg(x,a0,a1) + mu * n_sig * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * sig2(x,m,s2)))
 ## ```
 ##  with following objectives:
 ##  * Compare plain likelihood fit and profile likelihood fit
@@ -73,7 +75,7 @@ myc.cd()
 # Generate a toy data sample of 1000 events in x from model
 
 #  [RooAbsPdf::generate](https://root.cern.ch/doc/master/classRooAbsPdf.html), this will generate *unbinned* data, see [RooDataSet](https://root.cern.ch/doc/master/classRooDataSet.html)
-data = model.generate(R.RooArgSet(x), 1000)
+data = model.generate(R.RooArgSet(x), 100)
 
 # Fit model to data
 model.fitTo(data)
@@ -132,3 +134,44 @@ myc.Update()
 myc.SaveAs("test_roofit_extended_1.png")
 
 
+# Fit the signal strength
+# ---------------------------------------------------
+# Set the signal normalization as a constant, using the above fit result
+nsig_norm.setConstant(1)
+mu_sig.setConstant(0)
+
+model.fitTo(data)
+
+# Plot the NLL scan and Profile NLL scan
+# ---------------------------------------------------
+
+# Let's be realistic, set some sensible ranges for all free parameters
+mu_sig.setRange(0, 2.)
+a0.setRange(a0.getVal() - a0.getError(), a0.getVal() + a0.getError())
+a1.setRange(a1.getVal() - a1.getError(), a1.getVal() + a1.getError())
+
+# plain NLL, see [RooAbsPdf::createNLL](https://root.cern.ch/doc/master/classRooAbsPdf.html)
+nll = model.createNLL(data, R.RooFit.NumCPU(2)) # use 2 CPU cores to speed up
+
+# Profile NLL (PLL), see [RooAbsReal::createProfile](https://root.cern.ch/doc/master/classRooAbsReal.html)
+#   RooAbsReal::createProfile(const RooArgSet & paramsOfInterest)
+pll = nll.createProfile(mu_sig)
+
+myc.Clear()
+mframe = mu_sig.frame(R.RooFit.Title("NLL scan"))
+# Plot NLL and PLL
+nll.plotOn(mframe, R.RooFit.ShiftToZero(), R.RooFit.LineColor(R.kBlue), R.RooFit.Name('NLL'))
+# *BE CAUTIONS* scanning a PLL is much slower as it does minimization at each step
+pll.plotOn(mframe, R.RooFit.LineColor(R.kRed), R.RooFit.Name('PLL'), R.RooFit.Precision(1) )
+
+mframe.SetMinimum(0)
+mframe.SetMaximum(30.)
+mframe.Draw()
+
+lg.Clear()
+lg.AddEntry(mframe.findObject("NLL"), 'Plain negative llh', 'l')
+lg.AddEntry(mframe.findObject("PLL"), 'Profile nll', 'l')
+lg.Draw("same")
+
+myc.Update()
+myc.SaveAs("test_roofit_extended_2.png")
