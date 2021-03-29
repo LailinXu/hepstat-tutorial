@@ -75,18 +75,53 @@ model.fitTo(data)
 
 # Plot data and PDF overlaid
 xframe = x.frame(R.RooFit.Title("Example of composite pdf=(sig1+sig2)+bkg"))
-data.plotOn(xframe)
-model.plotOn(xframe)
-myc.Draw()
+data.plotOn(xframe, R.RooFit.Name('Data'))
+model.plotOn(xframe, R.RooFit.Name('Full_Model'), R.RooFit.LineColor(R.kBlue))
+xframe.Draw()
+ymax = xframe.GetMaximum()
+xframe.SetMaximum(ymax*1.2)
 
 # Overlay the background component of model with a dashed line
 ras_bkg = R.RooArgSet(bkg)
-model.plotOn(xframe, R.RooFit.Components(ras_bkg), R.RooFit.LineStyle(R.kDashed))
-myc.Draw()
+model.plotOn(xframe, R.RooFit.Components(ras_bkg), R.RooFit.LineStyle(R.kDashed), R.RooFit.LineColor(R.kRed), R.RooFit.Name('Bkg'))
+xframe.Draw()
+
+# Overlay the signal components of model with a dotted line
+ras_sig1 = R.RooArgSet(sig1)
+model.plotOn(xframe, R.RooFit.Components(ras_sig1), R.RooFit.LineStyle(R.kDotted), R.RooFit.LineColor(R.kMagenta), R.RooFit.Name('Sig1'))
+xframe.Draw()
+ras_sig2 = R.RooArgSet(sig2)
+model.plotOn(xframe, R.RooFit.Components(ras_sig2), R.RooFit.LineStyle(R.kDotted), R.RooFit.LineColor(R.kGreen+2), R.RooFit.Name('Sig2'))
+xframe.Draw()
 
 # Overlay the background+sig2 components of model with a dotted line
 ras_bkg_sig2 = R.RooArgSet(bkg, sig2)
-model.plotOn(xframe, R.RooFit.Components(ras_bkg_sig2), R.RooFit.LineStyle(R.kDotted))
-myc.Draw()
+model.plotOn(xframe, R.RooFit.Components(ras_bkg_sig2), R.RooFit.LineStyle(R.kDotted), R.RooFit.LineColor(R.kCyan), R.RooFit.Name('Sig2Bkg'))
 
+# Draw legends
+lIy = 0.92
+lg = R.TLegend(0.60, lIy-0.25, 0.85, lIy)
+lg.SetBorderSize(0)
+lg.SetFillStyle(0)
+lg.SetTextFont(42)
+lg.SetTextSize(0.04)
+lg.AddEntry(xframe.findObject("Data"), 'Data', 'p')
+lg.AddEntry(xframe.findObject("Full_Model"), 'Full model (Sig1+Sig2+Bkg)', 'l')
+lg.AddEntry(xframe.findObject("Bkg"), 'Bkg', 'l')
+lg.AddEntry(xframe.findObject("Sig1"), 'Sig1', 'l')
+lg.AddEntry(xframe.findObject("Sig2"), 'Sig2', 'l')
+lg.Draw("same")
+
+# Show fit results in the canvas
+xlab0, ylab0=0.18, 0.90
+fv1 = R.TPaveText(xlab0, ylab0, xlab0+0.20, 0.75,"NDC")
+fv1.SetBorderSize(0)
+fv1.SetFillStyle(0)
+fv1.SetTextAlign(11)
+fv1.SetTextSize(0.030)
+fv1.AddText("{0:s} = {1:.2f} #pm {2:.2f}".format(bkgfrac.GetTitle(), bkgfrac.getVal(), bkgfrac.getError()))
+fv1.AddText("{0:s} = {1:.2f} #pm {2:.2f}".format(sig1frac.GetTitle(), sig1frac.getVal(), sig1frac.getError()))
+fv1.Draw("same")
+
+myc.Update()
 myc.SaveAs("test_roofit_1.png")
