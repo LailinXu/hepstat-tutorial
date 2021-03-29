@@ -6,9 +6,8 @@
 ## pdf = f_bkg * bkg(x,a0,a1) + (1-fbkg) * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * sig2(x,m,s2)))
 ## ```
 ##  with following objectives:
-##  * Construct a simple fit in RooFit and plot the NLL
-##  * Compare binned and unbinned fit results
-##  * Compare un-extended and extended likelihoof it
+##  * Compare plain likelihood fit and profile likelihood fit
+##  * Fit with nuisance parameters with constraints
 ##
 ## \macro_image
 ## \macro_output
@@ -44,6 +43,13 @@ a0 = R.RooRealVar("a0", "a0", 0.5, 0., 1.)
 a1 = R.RooRealVar("a1", "a1", -0.2, 0., 1.)
 bkg = R.RooChebychev("bkg", "Background", x, R.RooArgList(a0, a1))
 
+# Normalization of the components
+nsig_norm = R.RooRealVar("nsig_norm", "number of signal events", 500, 0., 10000)
+mu_sig = R.RooRealVar("mu_sig", "signal strength", 1, 0, 100.)
+mu_sig.setConstant(1)
+nsig = R.RooProduct("nsig", "number of signal events", R.RooArgList(nsig_norm, mu_sig))
+nbkg = R.RooRealVar("nbkg", "number of background events", 500, 0, 10000)
+
 # Full model: the total PDF
 # ------------------------------------------
 # Sum the signal components into a composite signal p.d.f.. Here we use [RooAddPdf](https://root.cern.ch/doc/master/classRooAddPdf.html)
@@ -52,8 +58,7 @@ sig1frac = R.RooRealVar("sig1frac", "fraction of component 1 in signal", 0.8, 0.
 sig = R.RooAddPdf("sig", "Signal", R.RooArgList(sig1, sig2), R.RooArgList(sig1frac))
 
 # Sum the composite signal and background
-bkgfrac = R.RooRealVar("bkgfrac", "fraction of background", 0.5, 0., 1.)
-model = R.RooAddPdf("model", "g1+g2+a", R.RooArgList(bkg, sig), R.RooArgList(bkgfrac))
+model = R.RooAddPdf("model", "g1+g2+a", R.RooArgList(bkg, sig), R.RooArgList(nbkg, nsig))
 
 # A quick look at the model
 model.Print()
@@ -119,79 +124,11 @@ fv1.SetBorderSize(0)
 fv1.SetFillStyle(0)
 fv1.SetTextAlign(11)
 fv1.SetTextSize(0.030)
-fv1.AddText("{0:s} = {1:.2f} #pm {2:.2f}".format(bkgfrac.GetTitle(), bkgfrac.getVal(), bkgfrac.getError()))
-fv1.AddText("{0:s} = {1:.2f} #pm {2:.2f}".format(sig1frac.GetTitle(), sig1frac.getVal(), sig1frac.getError()))
+fv1.AddText("{0:s} = {1:.2f} #pm {2:.2f}".format(nbkg.GetTitle(), nbkg.getVal(), nbkg.getError()))
+fv1.AddText("{0:s} = {1:.2f} #pm {2:.2f}".format(nsig_norm.GetTitle(), nsig_norm.getVal(), nsig_norm.getError()))
 fv1.Draw("same")
 
 myc.Update()
-myc.SaveAs("test_roofit_1.png")
+myc.SaveAs("test_roofit_extended_1.png")
 
-
-# Questions:
-# ---------------------------------------------------
-#   * What are the free parameters of our model?
-#   * Now suppose the background modelling is well controled from a side-band, for both its normalization and shape. Do the fit again.
-# ---------------------------------------------------
-
-
-# Do fitting with Binned data
-# ---------------------------------------------------
-
-# Create a binned data
-data.Print("v")
-x.setBins(10)
-dh = R.RooDataHist("dh", "binned version of d", R.RooArgSet(x), data)
-dh.Print("v")
-
-xframe2 = x.frame(R.RooFit.Title("Binned data"))
-dh.plotOn(xframe2, R.RooFit.LineColor(R.kRed), R.RooFit.MarkerColor(R.kRed), R.RooFit.Name('hData'))
-
-myc.Clear()
-xframe2.Draw()
-
-# Do the fitting again
-
-model.fitTo(dh)
-
-# Plot data and PDF overlaid
-model.plotOn(xframe2, R.RooFit.Name('hFull_Model'), R.RooFit.LineColor(R.kBlue))
-xframe2.Draw()
-ymax = xframe2.GetMaximum()
-xframe2.SetMaximum(ymax*1.2)
-
-# Overlay the background component of model with a dashed line
-ras_bkg = R.RooArgSet(bkg)
-model.plotOn(xframe2, R.RooFit.Components(ras_bkg), R.RooFit.LineStyle(R.kDashed), R.RooFit.LineColor(R.kRed), R.RooFit.Name('hBkg'))
-xframe2.Draw()
-
-# Overlay the signal components of model with a dotted line
-ras_sig1 = R.RooArgSet(sig1)
-model.plotOn(xframe2, R.RooFit.Components(ras_sig1), R.RooFit.LineStyle(R.kDotted), R.RooFit.LineColor(R.kMagenta), R.RooFit.Name('hSig1'))
-xframe2.Draw()
-ras_sig2 = R.RooArgSet(sig2)
-model.plotOn(xframe2, R.RooFit.Components(ras_sig2), R.RooFit.LineStyle(R.kDotted), R.RooFit.LineColor(R.kGreen+2), R.RooFit.Name('hSig2'))
-xframe2.Draw()
-
-lg.Clear()
-lg.AddEntry(xframe2.findObject("hData"), 'Data', 'p')
-lg.AddEntry(xframe2.findObject("hFull_Model"), 'Full model (Sig1+Sig2+Bkg)', 'l')
-lg.AddEntry(xframe2.findObject("hBkg"), 'Bkg', 'l')
-lg.AddEntry(xframe2.findObject("hSig1"), 'Sig1', 'l')
-lg.AddEntry(xframe2.findObject("hSig2"), 'Sig2', 'l')
-lg.Draw("same")
-
-fv1.Clear()
-fv1.AddText("{0:s} = {1:.2f} #pm {2:.2f}".format(bkgfrac.GetTitle(), bkgfrac.getVal(), bkgfrac.getError()))
-fv1.AddText("{0:s} = {1:.2f} #pm {2:.2f}".format(sig1frac.GetTitle(), sig1frac.getVal(), sig1frac.getError()))
-fv1.Draw("same")
-
-
-myc.Update()
-myc.SaveAs("test_roofit_2.png")
-
-# Questions:
-# ---------------------------------------------------
-#   * How the fit results are compared with the unbinned case?
-#   * How the fit results will change with different binning size?
-# ---------------------------------------------------
 
