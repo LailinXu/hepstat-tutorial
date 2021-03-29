@@ -20,7 +20,7 @@
 
 # Import the ROOT libraries
 import ROOT as R
-from math import pow, sqrt
+from math import pow, sqrt, fabs
 R.gROOT.SetStyle("ATLAS")
 
 # Setup component pdfs
@@ -175,3 +175,33 @@ lg.Draw("same")
 
 myc.Update()
 myc.SaveAs("test_roofit_extended_2.png")
+
+
+# Questions:
+# ---------------------------------------------------
+#  * Why we need to constrain the ranges of some free parameters?
+#  * Are there better ways to deal with those nuisance parameters instead of constrainning their ranges by hand?
+
+
+# Fitting with constraints
+# ---------------------------------------------------
+
+# Without constraints
+r1 = model.fitTo(data, R.RooFit.Save())
+
+# Add some constraints for nuisance parameters
+syst_a0 = a0.getError()
+const_a0 = R.RooGaussian("constraint_a0", "constraint_a0", a0, R.RooFit.RooConst(a0.getVal()), R.RooFit.RooConst(fabs(syst_a0)))
+
+syst_a1 = a1.getError()
+const_a1 = R.RooGaussian("constraint_a1", "constraint_a1", a1, R.RooFit.RooConst(a1.getVal()), R.RooFit.RooConst(fabs(syst_a1)))
+
+syst_sig1frac = sig1frac.getError()
+const_sig1frac = R.RooGaussian("constraint_sig1frac", "constraint_sig1frac", sig1frac, R.RooFit.RooConst(sig1frac.getVal()), R.RooFit.RooConst(fabs(syst_sig1frac)))
+
+r2 = model.fitTo(data, R.RooFit.ExternalConstraints(R.RooArgSet(const_a0, const_a1, const_sig1frac)), R.RooFit.Save())
+
+print("\nfit result without constraints")
+r1.Print("v")
+print("\nfit result with constraints")
+r2.Print("v")
