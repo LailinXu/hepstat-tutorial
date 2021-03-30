@@ -1,10 +1,12 @@
 # Set up pyroot using docker
 
 
-## Installation of pyroot
+## Installation of ROOT
+
+Download the `root` docker image from [rootproject DockerHub](https://hub.docker.com/r/rootproject/root), either in a Linux/Unix terminal or Winows PowerShell:
 
 ```
-docker pull sauerburger/pyroot3
+docker pull rootproject/root
 ```
 
 ### macOS
@@ -52,7 +54,13 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> 
 ```
 
+### Windows
+
+
+
 ## Installation of jupyter_pyroot
+
+### macOS
 
 ```
 docker pull wgseligman/jupyter-pyroot
@@ -62,3 +70,44 @@ After the image is downloaded, you can launch it like the following
 ```
 docker run -p 8080:8080 -v $PWD/notebook:/work wgseligman/jupyter-pyroot
 ```
+
+This is to map the directory `$PWD/notebook` of your local computer to the docker container directory `/work`, so that when you enter the docker Jupyter container, you can read and write files from your local computer.
+
+After that, you should see something like the following
+```
+➜  ROOT docker run -p 8080:8080 -v $PWD/notebook:/work wgseligman/jupyter-pyroot
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+[I 03:48:53.669 NotebookApp] Writing notebook server cookie secret to /root/.local/share/jupyter/runtime/notebook_cookie_secret
+[I 03:48:54.903 NotebookApp] JupyterLab extension loaded from /usr/local/lib/python3.6/site-packages/jupyterlab
+[I 03:48:54.903 NotebookApp] JupyterLab application directory is /usr/local/share/jupyter/lab
+[I 03:48:54.913 NotebookApp] Serving notebooks from local directory: /work
+[I 03:48:54.913 NotebookApp] Jupyter Notebook 6.1.5 is running at:
+[I 03:48:54.913 NotebookApp] http://c89bcf5a1dc3:8080/?token=d637a62c52ef8510adf946c21fbf8047481a1a55a0447f21
+[I 03:48:54.913 NotebookApp]  or http://127.0.0.1:8080/?token=d637a62c52ef8510adf946c21fbf8047481a1a55a0447f21
+[I 03:48:54.914 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[W 03:48:54.932 NotebookApp] No web browser found: could not locate runnable browser.
+[C 03:48:54.933 NotebookApp] 
+    
+    To access the notebook, open this file in a browser:
+        file:///root/.local/share/jupyter/runtime/nbserver-1-open.html
+    Or copy and paste one of these URLs:
+        http://c89bcf5a1dc3:8080/?token=d637a62c52ef8510adf946c21fbf8047481a1a55a0447f21
+     or http://127.0.0.1:8080/?token=d637a62c52ef8510adf946c21fbf8047481a1a55a0447f21
+```
+
+In your Docker Desktop GUI, under `Containers/App`, you can see the following container is running:
+
+![Docker container for jupyter_pyroot](figs/Docker_jupyter_pyroot.png)
+
+Then you click the first button `OPEN IN BROSWER`, a notebook browser will open up. You need to enter the token, which is printed out to your screen as shown above, which is `d637a62c52ef8510adf946c21fbf8047481a1a55a0447f21` in my case:
+
+![Jupyter login](figs/Jupyter_login.png)
+
+after login, you can start the Jupyter notebook:
+
+![Jupyter start](figs/Jupyter_start.png)
+
+As expected, files from your local computer directory `$PWD/notebook` will show up. But you can also upload files from here by click the `upload` button on top right. 
+
+
+### Windows
