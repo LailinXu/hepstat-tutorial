@@ -26,3 +26,43 @@ You need `ROOT` (v6.22 or newer) and `python` installed for tutorials here. If y
 
 The Jupyter setup is optional and if you are interested, you can find some intruction [here](README_jupyter.md) to set it up, or the docker setup in [the above instruction](README_pyroot.md#installation-of-jupyter_pyroot).
 
+## Tutorials
+
+### Parameter fitting in ROOT/RooFit
+
+#### Hands-on 1: [Basic fitting](Fitting/hepstat_tutorial_fit.py.nbconvert.ipynb)
+
+Fit example with `ROOT`, with following objectives:
+ * Fit a histogram with a linear chi-squre fit, and compare results with by-hand calculations
+ * Different fiting options
+ * Compare chi-squre fit and likelihood fit
+
+#### Hands-on 2: [Fitting with RooFit](Fitting/hepstat_tutorial_roofit.py.nbconvert.ipynb)
+
+Fit examples with `RooFit`, composite p.d.f with signal and background component
+```
+pdf = f_bkg * bkg(x,a0,a1) + (1-fbkg) * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * sig2(x,m,s2)))
+```
+ with following objectives:
+ * Construct a simple fit in RooFit and plot the NLL
+ * Compare binned and unbinned fit results
+ * Compare un-extended and extended likelihoof it
+
+#### Hands-on 3: [Advanced fitting with RooFit](Fitting/hepstat_tutorial_roofit_extended.py.nbconvert.ipynb)
+
+A bit advanced fit examples with `RooFit`, composite p.d.f with signal and background component, extended
+```
+pdf = n_bkg * bkg(x,a0,a1) + n_sig * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * sig2(x,m,s2)))
+```
+or using a signal strength
+```
+pdf = n_bkg * bkg(x,a0,a1) + mu * n_sig * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * sig2(x,m,s2)))
+```
+ with following objectives:
+ * Compare plain likelihood fit and profile likelihood fit
+ * Fit with nuisance parameters with constraints
+
+
+### Hypothesis test, Confidence intervals and Exclusion limits
+
+To be added.
