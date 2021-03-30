@@ -19,6 +19,12 @@
 * INFN School Of Statistics, [2019](https://agenda.infn.it/event/16360/)
 * IN2P3 School Of Statistics, [2021](https://indico.in2p3.fr/event/20220/timetable/)
 
+
+## Preparation of the tutorials
+
+You need `ROOT` (v6.22 or newer) and `python` installed for tutorials here. If you don't have them available, either from your local computer or a linux server, follow the instructions [here](README_pyroot.md) to install the `root` docker container.
+
+
 ## Jupyter Notebook
 
 ### Jupyter
