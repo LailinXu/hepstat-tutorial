@@ -56,6 +56,72 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ### Windows
 
+To enable graphics, like using the `TBrowser` GUI, you need to install [Xming](https://sourceforge.net/projects/xming/) first, following the instruction from the `rootproject` [DockerHub](https://hub.docker.com/r/rootproject/root).
+
+Open the PowerShell to set up `Xming`:
+```
+cd 'C:\Program Files (x86)\Xming\'
+.\Xming.exe :28 -ac
+```
+This is to set the port `:28` so that the ROOT docker container display could be exported to Xming via this port. You can chose any valid port you want, but rember the port number.
+
+Then you need to find out the IP address of your localost:
+
+```
+PS C:\Users\ustc\Docker> Test-Connection -ComputerName (hostname) -Count 1  | Select IPV4Address
+```
+You should see something like:
+```
+IPV4Address
+-----------
+192.168.3.4
+```
+You would need this IP address later when starting the root container. You can now start the docker conatiner, via:
+```
+PS C:\Users\ustc\Docker> docker run --rm -it -e DISPLAY=192.168.3.4:28 -v ${PWD}\ROOT:/userhome rootproject/root bash -l
+```
+Some explanation:
+* `DISPLAY` is to use the `Xming` port you set above, with the correct IP address and port number.
+* `-v ${PWD}\ROOT:/userhome` is to map your local directory `${PWD}\ROOT`, from your computer, to the container path `/userhome`, so that you can read and write files from or to your computer
+* `bash -l` is to start the command line after entering the container.
+
+You can do the following steps:
+Open `root` in the command line inside the container:
+```
+root@ed079919c462:/opt# root
+   ------------------------------------------------------------------
+  | Welcome to ROOT 6.22/06                        https://root.cern |
+  | (c) 1995-2020, The ROOT Team; conception: R. Brun, F. Rademakers |
+  | Built for linuxx8664gcc on Nov 27 2020, 15:14:08                 |
+  | From tags/v6-22-06@v6-22-06                                      |
+  | Try '.help', '.demo', '.license', '.credits', '.quit'/'.q'       |
+   ------------------------------------------------------------------
+
+root [0] TBrowser b
+(TBrowser &) Name: Browser Title: ROOT Object Browser
+root [1] .q
+```
+If everything works fine, now you should see the `TBrowser` GUI opens up.
+
+Run python inside the container. Note only `python3` is available, not `python2`:
+```
+root@ed079919c462:/opt# python3
+Python 3.8.5 (default, Jul 28 2020, 12:59:40)
+[GCC 9.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> exit()
+```
+You can also read and write files from the path `/userhome`, which is equivalent to `${PWD}\ROOT` of your computer:
+```
+root@ed079919c462:/opt# ls
+packages  root
+root@ed079919c462:/opt# cd /userhome/
+root@ed079919c462:/userhome# ls
+ROOT  test.pdf  test.png  test.root
+root@ed079919c462:/userhome# pwd
+/userhome
+```
+
 
 
 ## Installation of jupyter_pyroot
@@ -111,3 +177,27 @@ As expected, files from your local computer directory `$PWD/notebook` will show 
 
 
 ### Windows
+
+Install the [jupyter_notebook](https://hub.docker.com/repository/docker/wgseligman/jupyter-pyroot/general) container in PowerShell:
+
+```
+PS C:\Users\ustc\Docker> docker pull wgseligman/jupyter-pyroot
+```
+
+Start the container:
+```
+PS C:\Users\ustc\Docker> docker run -p 8080:8080 -v ${PWD}\notebook:/work wgseligman/jupyter-pyroot
+```
+again here is to mount your local path `${PWD}\notebook` to the container path `/work`.
+
+You should see some print out on your screen.
+
+Then go to your Docker Desktop, and you should see the `jupyter_notebook` container shows up:
+
+![Jupyter_docker_windows](figs/docker_jupyter_pyroot_windows.png)
+
+Click the `OPEN THE BROSWER` button and the jupyter notebook will show up. Enter the token from the PowerShell screen. Now you can enjoy the notebook:
+
+![Jupyter_start_windows](figs/jupyter_pyroot_windows.png)
+
+Do some test to see everything works fine.
