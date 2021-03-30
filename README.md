@@ -24,5 +24,5 @@
 
 You need `ROOT` (v6.22 or newer) and `python` installed for tutorials here. If you don't have them available, either from your local computer or a linux server, follow the instructions [here](README_pyroot.md) to install the `root` docker container.
 
-The Jupyter setup is optional and if you are interested, you can find some intruction [here](README_jupyter.md) to set it up, or the docker setup in [the above instruction](README_pyroot.md).
+The Jupyter setup is optional and if you are interested, you can find some intruction [here](README_jupyter.md) to set it up, or the docker setup in [the above instruction](README_pyroot.md#installation-of-jupyter_pyroot).
 
