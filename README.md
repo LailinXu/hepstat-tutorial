@@ -70,6 +70,7 @@ The (Monte Carlo) data is a Ttree with lepton four-vector informaiton available.
 
 Tips and requirements:
 * Construct a `S+B` model: S: signal, Gaussian, B: background, polynomial
+* Restrict to the mass range of 110 GeV to 160 GeV
 * Step 1: Fit the mass peak, compare binned and unbinned fit results
 * Step 2: fix the mass peak and fit the signal and background yields
 
