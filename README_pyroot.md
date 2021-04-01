@@ -129,19 +129,19 @@ root@ed079919c462:/userhome# pwd
 ### macOS
 
 ```
-docker pull wgseligman/jupyter-pyroot
+docker pull lailinxu/jupyter-pyroot
 ```
 
 After the image is downloaded, you can launch it like the following
 ```
-docker run -p 8080:8080 -v $PWD/notebook:/work wgseligman/jupyter-pyroot
+docker run -p 8080:8080 -v $PWD/notebook:/work lailinxu/jupyter-pyroot
 ```
 
 This is to map the directory `$PWD/notebook` of your local computer to the docker container directory `/work`, so that when you enter the docker Jupyter container, you can read and write files from your local computer.
 
 After that, you should see something like the following
 ```
-➜  ROOT docker run -p 8080:8080 -v $PWD/notebook:/work wgseligman/jupyter-pyroot
+➜  ROOT docker run -p 8080:8080 -v $PWD/notebook:/work lailinxu/jupyter-pyroot
 WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
 [I 03:48:53.669 NotebookApp] Writing notebook server cookie secret to /root/.local/share/jupyter/runtime/notebook_cookie_secret
 [I 03:48:54.903 NotebookApp] JupyterLab extension loaded from /usr/local/lib/python3.6/site-packages/jupyterlab
@@ -178,15 +178,15 @@ As expected, files from your local computer directory `$PWD/notebook` will show 
 
 ### Windows
 
-Install the [jupyter_notebook](https://hub.docker.com/repository/docker/wgseligman/jupyter-pyroot/general) container in PowerShell:
+Install the [jupyter_notebook](https://hub.docker.com/repository/docker/lailinxu/jupyter-pyroot/general) container in PowerShell:
 
 ```
-PS C:\Users\ustc\Docker> docker pull wgseligman/jupyter-pyroot
+PS C:\Users\ustc\Docker> docker pull lailinxu/jupyter-pyroot
 ```
 
 Start the container:
 ```
-PS C:\Users\ustc\Docker> docker run -p 8080:8080 -v ${PWD}\notebook:/work wgseligman/jupyter-pyroot
+PS C:\Users\ustc\Docker> docker run -p 8080:8080 -v ${PWD}\notebook:/work lailinxu/jupyter-pyroot
 ```
 again here is to mount your local path `${PWD}\notebook` to the container path `/work`.
 

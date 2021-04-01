@@ -63,6 +63,18 @@ pdf = n_bkg * bkg(x,a0,a1) + mu * n_sig * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * s
  * Fit with nuisance parameters with constraints
 
 
+#### Homework
+
+Fit the Higgs peak in ATLAS H4l open "data": http://opendata.cern.ch/record/3823, MC: `gg->H->ZZ->4l` with mH = 125 GeV, for 2016 ATLAS open data release.
+The (Monte Carlo) data is a Ttree with lepton four-vector informaiton available. Reconstruct the invariant mass of the four-lepton final state. An example code to process the TTree can be found [here](Fitting/h4l_ana_example.py). 
+
+Tips and requirements:
+* Construct a `S+B` model: S: signal, Gaussian, B: background, polynomial
+* Step 1: Fit the mass peak, compare binned and unbinned fit results
+* Step 2: fix the mass peak and fit the signal and background yields
+
+
+
 ### Hypothesis test, Confidence intervals and Exclusion limits
 
 To be added.
