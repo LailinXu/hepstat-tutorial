@@ -27,6 +27,10 @@ nbins, xmin, xmax = 100, 110, 130
 h_m4l = R.TH1F(hname, hname, nbins, xmin, xmax)
 h_m4l.Sumw2()
 
+# Unbinned data
+r_m4l = R.RooRealVar("obs_m4l", "obs_m4l", xmin, xmax)
+data_unbinned = R.RooDataSet("ds", "ds", R.RooArgSet(r_m4l))
+
 # Loop all events
 nevt_max = min(nevents, 1000)
 for ie in range(nevt_max):
@@ -49,6 +53,11 @@ for ie in range(nevt_max):
   # the invariant mass
   m4l = tlz_4l.M()*1e-3 # MeV -> GeV
   h_m4l.Fill(m4l, wt)
+
+  r_m4l.setVal(m4l)
+  data_unbinned.add(R.RooArgSet(r_m4l))
+
+data_unbinned.Print()
 
 # Plotting
 myc = R.TCanvas("c", "c", 800, 600)
