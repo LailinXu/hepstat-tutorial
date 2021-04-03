@@ -37,7 +37,7 @@ for mH in mHs:
   sig = R.RooGaussian("sig", "Signal", x, mean, sigma)
 
   # Generate pseudo data via sampling
-  data = sig.generate(x, nevents)
+  data = sig.generate(R.RooArgSet(x), nevents)
   x.setBins(50)
   hname = "sig_{:d}".format(int(mH))
   dh = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
@@ -56,8 +56,8 @@ a1 = R.RooRealVar("a1", "a1", p1)
 bkg = R.RooPolynomial("bkg", "Background", x, R.RooArgList(a0, a1))
 
 # Generate pseudo data via sampling
-data = bkg.generate(x, nevents)
-data_obs = bkg.generate(x, nevents)
+data = bkg.generate(R.RooArgSet(x), nevents)
+data_obs = bkg.generate(R.RooArgSet(x), nevents)
 x.setBins(50)
 hname = "bkg"
 dh = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
@@ -67,8 +67,8 @@ dh.SetName(hname)
 # ----------------
 x.setBins(50)
 hname = "obsData"
-dh = R.RooDataHist(hname, hname, R.RooArgSet(x), data_obs).createHistogram(hname, x)
-dh.SetName(hname)
+dh_obs = R.RooDataHist(hname, hname, R.RooArgSet(x), data_obs).createHistogram(hname, x)
+dh_obs.SetName(hname)
 
 
 # Background variations
@@ -79,7 +79,7 @@ a1 = R.RooRealVar("a1", "a1", p1*0.99)
 bkg = R.RooPolynomial("bkg_up", "Background", x, R.RooArgList(a0, a1))
 
 # Generate pseudo data via sampling
-data = bkg.generate(x, nevents)
+data = bkg.generate(R.RooArgSet(x), nevents)
 x.setBins(50)
 hname = "bkg_up"
 dh_up = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
@@ -91,13 +91,14 @@ a1 = R.RooRealVar("a1", "a1", p1*1.01)
 bkg = R.RooPolynomial("bkg_dn", "Background", x, R.RooArgList(a0, a1))
 
 # Generate pseudo data via sampling
-data = bkg.generate(x, nevents)
+data = bkg.generate(R.RooArgSet(x), nevents)
 x.setBins(50)
 hname = "bkg_dn"
 dh_dn = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
 dh_dn.SetName(hname)
 
 tfout.cd()
+dh_obs.Write()
 dh.Write()
 dh_up.Write()
 dh_dn.Write()

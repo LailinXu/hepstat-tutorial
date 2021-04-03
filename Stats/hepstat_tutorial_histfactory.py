@@ -30,7 +30,7 @@ w = R.RooWorkspace("w")
 
 # Create pdf components
 #   A single syntax exists to instantiate all RooFit pdf and function classes
-#   ClassName::objectname(…) creates an instance of ClassName with the given object name (and identical title).
+#   ClassName::objectname(...) creates an instance of ClassName with the given object name (and identical title).
 w.factory("Chebychev::bkg(x[0,10],{a0[0.5,0.,1],a1[-0.2,0.,1.]})")
 w.factory("Gaussian::sig1(x,mean[5.],width1[0.5])")
 w.factory("Gaussian::sig2(x,mean,width2[1.0])")
@@ -46,7 +46,7 @@ model = w.pdf("model")
 model.Print()
 
 # Generate pseudo data via sampling
-data = model.generate(x, 1000)
+data = model.generate(R.RooArgSet(x), 1000)
 
 
 # Fit and plot model
@@ -107,7 +107,7 @@ w.Import(mc)
 w.Print("t")
 
 # Write the workspace to a file
-w.writeToFile("test_model.root") 
+w.writeToFile("test_model_ws.root") 
 
 # Questions:
 # ---------------------------------------------------
