@@ -31,25 +31,25 @@ w = R.RooWorkspace("w")
 # Create pdf components
 #   A single syntax exists to instantiate all RooFit pdf and function classes
 #   ClassName::objectname(…) creates an instance of ClassName with the given object name (and identical title).
-#w.factory("expr::bkg(’a0+a1*x', x[0,10],a0[0.5,0,1],a1[-0.2,0,1])")
 w.factory("Chebychev::bkg(x[0,10],{a0[0.5,0.,1],a1[-0.2,0.,1.]})")
-w.factory("Gaussian::sig1(x,mean[5.],width[0.5])")
-w.factory("Gaussian::sig2(x,mean,width)")
+w.factory("Gaussian::sig1(x,mean[5.],width1[0.5])")
+w.factory("Gaussian::sig2(x,mean,width2[1.0])")
 
 # Create the total model
 w.factory("expr::sig2frac('1.-sig1frac',sig1frac[0.8,0,1.])")
 w.factory("SUM::sig(sig1frac*sig1,sig2frac*sig2)")
-w.factory("expr::S('mu_sig*nsig',mu_sig[1,0,10],nsig[50])")
-w.factory("SUM::model(S*sig,nbkg[100,0,100]*bkg)")
+w.factory("expr::S('mu_sig*nsig',mu_sig[1,0,10],nsig[500])")
+w.factory("SUM::model(S*sig,nbkg[1000,0,1000]*bkg)")
 
 x = w.var("x")
 model = w.pdf("model")
 model.Print()
 
-data = model.generate(x)
+# Generate pseudo data via sampling
+data = model.generate(x, 1000)
 
 
-# Sample, fit and plot model
+# Fit and plot model
 # ---------------------------------------------------
 
 myc = R.TCanvas("c", "c", 800, 600)
@@ -67,6 +67,25 @@ xframe.Draw()
 ymax = xframe.GetMaximum()
 xframe.SetMaximum(ymax*1.2)
 
+xframe.Draw()
+
+# Overlay teh bkg component
+ras_bkg = R.RooArgSet(w.obj("bkg"))
+model.plotOn(xframe, R.RooFit.Components(ras_bkg), R.RooFit.LineStyle(R.kDashed), R.RooFit.LineColor(R.kRed), R.RooFit.Name('Bkg'))
+xframe.Draw()
+
+# Overlay the signal components of model with a dotted line
+ras_sig1 = R.RooArgSet(w.obj("sig1"))
+model.plotOn(xframe, R.RooFit.Components(ras_sig1), R.RooFit.LineStyle(R.kDotted), R.RooFit.LineColor(R.kMagenta), R.RooFit.Name('Sig1'))
+xframe.Draw()
+ras_sig2 = R.RooArgSet(w.obj("sig2"))
+model.plotOn(xframe, R.RooFit.Components(ras_sig2), R.RooFit.LineStyle(R.kDotted), R.RooFit.LineColor(R.kGreen+2), R.RooFit.Name('Sig2'))
+xframe.Draw()
+
+myc.Update()
+myc.SaveAs("test_histfactory_1.png")
+
+
 # Import the Model and Data to a workspace
 # ---------------------------------------------------
 
@@ -77,12 +96,20 @@ mc=R.RooStats.ModelConfig("ModelConfig", w)
 # Set up the Model
 mc.SetPdf(w.pdf("model"))
 mc.SetParametersOfInterest(w.var("mu_sig"))
-mc.SetNuisanceParameters(R.RooArgSet(w.var("a0"), w.var("a1")))
+mc.SetNuisanceParameters(R.RooArgSet(w.var("a0"), w.var("a1"), w.var("sig1frac"), w.var("nbkg")))
 mc.SetObservables(w.var("x"))
 
 mc.Print()
 
 w.Import(mc)
 
+# Take a peek at the workspac
+w.Print("t")
+
 # Write the workspace to a file
 w.writeToFile("test_model.root") 
+
+# Questions:
+# ---------------------------------------------------
+# * What is inside this root file?
+# * What can I do with it?
