@@ -53,6 +53,7 @@ chan.SetStatErrorConfig(0.05, "Poisson")
 chan.SetData("obsData", inputhist)
 
 # Create the signal sample and set its histogram
+#   [RooStats::HistFactory::Sample](https://root.cern.ch/doc/v606/classRooStats_1_1HistFactory_1_1Sample.html#abc13f0d4bc554b73bdb5fd3eb3a6672b)(std::string Name, std::string HistoName, std::string InputFile, std::string HistoPath="")
 signal = R.RooStats.HistFactory.Sample( "signal", "sig_{}".format(mass), inputhist)
 
 # Add the parmaeter of interest and a systematic and try to make intelligent choice of upper bound
@@ -68,6 +69,7 @@ chan.AddSample( signal )
 background = R.RooStats.HistFactory.Sample( "background", "bkg", inputhist )
 
 # Add bkg systematics
+#  [RooStats::HistFactory::Sample::AddHistoSys](https://root.cern.ch/doc/v606/classRooStats_1_1HistFactory_1_1Sample.html#af6f7abaad023353f47f63c8db6f39af0) (std::string Name, std::string HistoNameLow, std::string HistoFileLow, std::string HistoPathLow, std::string HistoNameHigh, std::string HistoFileHigh, std::string HistoPathHigh)
 background.AddHistoSys("background_shape", "bkg_up", inputhist, "", "bkg_dn", inputhist, "")
 
 # Add the bkg sample to the Channel
@@ -77,13 +79,16 @@ chan.AddSample( background )
 meas.AddChannel(chan)
 
 # Collect the histograms from their files, print some output, 
+meas.CollectHistograms()
 meas.PrintTree()
 
-# Make workspace!
+# Make the workspace!
 # -----------------------
 hist2workspace = R.RooStats.HistFactory.HistoToWorkspaceFactoryFast(meas)
 ws = hist2workspace.MakeSingleChannelModel(meas, chan)
 
+# Write to a file
 ws.SetName("myws")
+ws.Print("t")
 ws.writeToFile("test_hf_ws_{}.root".format(mass))
 
