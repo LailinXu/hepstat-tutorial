@@ -29,19 +29,8 @@ if not os.path.isfile(inputhist):
     cmd = "python3 {}".format(pyhist)
     os.system(cmd)
 
-tfin = R.TFile(inputhist, "READ")
-data_hist = tfin.Get("obsData")
+# Signal mass point
 mass = 125
-sig_hist = tfin.Get("sig_{}".format(mass))
-bkg_hist = tfin.Get("bkg")
-bkg_hup = tfin.Get("bkg_up")
-bkg_hdn = tfin.Get("bkg_dn")
-sig_hist.Print()
-sig_hist.SetDirectory(0)
-bkg_hist.SetDirectory(0)
-data_hist.SetDirectory(0)
-bkg_hup.SetDirectory(0)
-bkg_hdn.SetDirectory(0)
 
 # Create a workspace
 # =======================
@@ -61,11 +50,10 @@ meas.AddConstantParam("Lumi")
 # Create a channel and set the measured value of data
 chan = R.RooStats.HistFactory.Channel( "SR" )
 chan.SetStatErrorConfig(0.05, "Poisson")
-chan.SetData( data_hist )
+chan.SetData("obsData", inputhist)
 
 # Create the signal sample and set its histogram
-signal = R.RooStats.HistFactory.Sample( "signal" )
-signal.SetHisto( sig_hist )
+signal = R.RooStats.HistFactory.Sample( "signal", "sig_{}".format(mass), inputhist)
 
 # Add the parmaeter of interest and a systematic and try to make intelligent choice of upper bound
 signal.AddNormFactor( "mu", 1, 0, 3)
@@ -77,8 +65,10 @@ signal.AddOverallSys( "signal_norm_uncertainty", 0.95, 1.05)
 chan.AddSample( signal )
 
 # Create the background sample and set its histogram
-background = R.RooStats.HistFactory.Sample( "background" )
-background.SetHisto( bkg_hist )
+background = R.RooStats.HistFactory.Sample( "background", "bkg", inputhist )
+
+# Add bkg systematics
+background.AddHistoSys("background_shape", "bkg_up", inputhist, "", "bkg_dn", inputhist, "")
 
 # Add the bkg sample to the Channel
 chan.AddSample( background )
@@ -97,5 +87,3 @@ ws = hist2workspace.MakeSingleChannelModel(meas, chan)
 ws.SetName("myws")
 ws.writeToFile("test_hf_ws_{}.root".format(mass))
 
-# Close up
-tfin.Close()
