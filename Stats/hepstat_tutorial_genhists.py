@@ -22,6 +22,8 @@ odir = "data"
 if not os.path.isdir(odir): os.makedirs(odir)
 tfout = R.TFile("data/h4l_toy_hists.root", "RECREATE")
 
+# Signal samples
+# ----------------
 nevents = 100000
 mHs = [120., 125., 130., 135., 140., 145., 150.]
 # Gaussian
@@ -45,6 +47,7 @@ for mH in mHs:
   dh.Write()
 
 # Nominal bkg
+# ----------------
 x = R.RooRealVar("x", "x", 110, 160)
 p0 = 480.
 p1 = -2.5
@@ -54,11 +57,22 @@ bkg = R.RooPolynomial("bkg", "Background", x, R.RooArgList(a0, a1))
 
 # Generate pseudo data via sampling
 data = bkg.generate(x, nevents)
+data_obs = bkg.generate(x, nevents)
 x.setBins(50)
 hname = "bkg"
 dh = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
 dh.SetName(hname)
 
+# Toy observed data
+# ----------------
+x.setBins(50)
+hname = "obsData"
+dh = R.RooDataHist(hname, hname, R.RooArgSet(x), data_obs).createHistogram(hname, x)
+dh.SetName(hname)
+
+
+# Background variations
+# ----------------
 # Variation up
 a0 = R.RooRealVar("a0", "a0", p0*1.02)
 a1 = R.RooRealVar("a1", "a1", p1*0.99)
@@ -82,7 +96,6 @@ x.setBins(50)
 hname = "bkg_dn"
 dh_dn = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
 dh_dn.SetName(hname)
-
 
 tfout.cd()
 dh.Write()
