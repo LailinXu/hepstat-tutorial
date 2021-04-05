@@ -24,7 +24,10 @@ tfout = R.TFile("data/h4l_toy_hists.root", "RECREATE")
 
 # Signal samples
 # ----------------
+# Number of toy events to obtain the signal/bkg distributions (only to get the shape)
 nevents = 100000
+# Number of toy events for the background
+nbkg_exp = 100
 mHs = [120., 125., 130., 135., 140., 145., 150.]
 # Gaussian
 for mH in mHs:
@@ -57,14 +60,16 @@ bkg = R.RooPolynomial("bkg", "Background", x, R.RooArgList(a0, a1))
 
 # Generate pseudo data via sampling
 data = bkg.generate(R.RooArgSet(x), nevents)
-data_obs = bkg.generate(R.RooArgSet(x), nevents)
 x.setBins(50)
 hname = "bkg"
 dh = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
+nint = dh.Integral()
+dh.Scale(nbkg_exp/nint)
 dh.SetName(hname)
 
 # Toy observed data
 # ----------------
+data_obs = bkg.generate(R.RooArgSet(x), nbkg_exp)
 x.setBins(50)
 hname = "obsData"
 dh_obs = R.RooDataHist(hname, hname, R.RooArgSet(x), data_obs).createHistogram(hname, x)
@@ -83,6 +88,7 @@ data = bkg.generate(R.RooArgSet(x), nevents)
 x.setBins(50)
 hname = "bkg_up"
 dh_up = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
+dh_up.Scale(nbkg_exp/nint)
 dh_up.SetName(hname)
 
 # Variation up
@@ -95,6 +101,7 @@ data = bkg.generate(R.RooArgSet(x), nevents)
 x.setBins(50)
 hname = "bkg_dn"
 dh_dn = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
+dh_dn.Scale(nbkg_exp/nint)
 dh_dn.SetName(hname)
 
 tfout.cd()
