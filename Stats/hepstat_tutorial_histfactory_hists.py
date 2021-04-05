@@ -13,7 +13,7 @@
 ##
 ## \author Lailin XU
 
-import os
+import os, sys
 # Import the ROOT libraries
 import ROOT as R
 from math import pow, sqrt
@@ -31,6 +31,7 @@ if not os.path.isfile(inputhist):
 
 # Signal mass point
 mass = 125
+# if len(sys.argv)>1: mass = int(sys.argv[1])
 
 # Create a workspace
 # =======================
