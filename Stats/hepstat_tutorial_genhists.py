@@ -25,6 +25,7 @@ tfout = R.TFile("data/h4l_toy_hists.root", "RECREATE")
 # Signal samples
 # ----------------
 # Number of toy events to obtain the signal/bkg distributions (only to get the shape)
+nbins = 25
 nevents = 100000
 # Number of toy events for the background
 nbkg_exp = 100
@@ -41,9 +42,10 @@ for mH in mHs:
 
   # Generate pseudo data via sampling
   data = sig.generate(R.RooArgSet(x), nevents)
-  x.setBins(50)
+  x.setBins(nbins)
   hname = "sig_{:d}".format(int(mH))
   dh = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
+  dh.Scale(1./(dh.Integral()))
   dh.SetName(hname)
 
   tfout.cd()
@@ -60,7 +62,7 @@ bkg = R.RooPolynomial("bkg", "Background", x, R.RooArgList(a0, a1))
 
 # Generate pseudo data via sampling
 data = bkg.generate(R.RooArgSet(x), nevents)
-x.setBins(50)
+x.setBins(nbins)
 hname = "bkg"
 dh = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
 nint = dh.Integral()
@@ -70,7 +72,7 @@ dh.SetName(hname)
 # Toy observed data
 # ----------------
 data_obs = bkg.generate(R.RooArgSet(x), nbkg_exp)
-x.setBins(50)
+x.setBins(nbins)
 hname = "obsData"
 dh_obs = R.RooDataHist(hname, hname, R.RooArgSet(x), data_obs).createHistogram(hname, x)
 dh_obs.SetName(hname)
@@ -85,7 +87,7 @@ bkg = R.RooPolynomial("bkg_up", "Background", x, R.RooArgList(a0, a1))
 
 # Generate pseudo data via sampling
 data = bkg.generate(R.RooArgSet(x), nevents)
-x.setBins(50)
+x.setBins(nbins)
 hname = "bkg_up"
 dh_up = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
 dh_up.Scale(nbkg_exp/nint)
@@ -98,7 +100,7 @@ bkg = R.RooPolynomial("bkg_dn", "Background", x, R.RooArgList(a0, a1))
 
 # Generate pseudo data via sampling
 data = bkg.generate(R.RooArgSet(x), nevents)
-x.setBins(50)
+x.setBins(nbins)
 hname = "bkg_dn"
 dh_dn = R.RooDataHist(hname, hname, R.RooArgSet(x), data).createHistogram(hname, x)
 dh_dn.Scale(nbkg_exp/nint)

@@ -70,6 +70,7 @@ chan.AddSample( signal )
 background = R.RooStats.HistFactory.Sample( "background", "bkg", inputhist )
 
 # Add bkg systematics
+background.AddOverallSys( "bkg_norm_uncertainty", 0.90, 1.10)
 #  [RooStats::HistFactory::Sample::AddHistoSys](https://root.cern.ch/doc/v606/classRooStats_1_1HistFactory_1_1Sample.html#af6f7abaad023353f47f63c8db6f39af0) (std::string Name, std::string HistoNameLow, std::string HistoFileLow, std::string HistoPathLow, std::string HistoNameHigh, std::string HistoFileHigh, std::string HistoPathHigh)
 background.AddHistoSys("background_shape", "bkg_up", inputhist, "", "bkg_dn", inputhist, "")
 

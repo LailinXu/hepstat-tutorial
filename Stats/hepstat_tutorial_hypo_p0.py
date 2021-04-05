@@ -18,7 +18,7 @@
 ## \macro_code
 ##
 ## \author Lailin XU
-## Based on the example [here](https://www.nikhef.nl/~vcroft/RooStats.html)
+## Based on the example [here](https://www.nikhef.nl/~vcroft/RooStats.html), and also [StandardFrequentistDiscovery.C](https://root.cern/doc/master/StandardFrequentistDiscovery_8C.html)
 
 import os
 # Import the ROOT libraries
@@ -82,8 +82,10 @@ ac.SetOneSidedDiscovery(True)
 # Get the hypo test result
 asResult = ac.GetHypoTest()
 asResult.Print()
+pvalue_as = asResult.NullPValue()
 
 # By hand calculation
+# =======================
 w.loadSnapshot(snapshotName_init)
 sbModel = w.obj("ModelConfig")
 pdf = sbModel.GetPdf()
@@ -130,3 +132,46 @@ obs_sig = sign*sqrt(fabs(obs_q0));
 print("\nUnconditional NLL value:", obs_nll_min)
 print("Conditional NLL value:", obs_nll_min_bkg)
 print("==> Asymmptotic signficance: ", obs_sig)
+
+# The frequentist appproach
+# =======================
+w.loadSnapshot(snapshotName_init)
+poi.Print()
+fc = R.RooStats.FrequentistCalculator(data, sbModel, bModel)
+# null toys, alt toys
+fc.SetToys(2500,1000)
+# Test statistics: profile liekelihood
+profll = R.RooStats.ProfileLikelihoodTestStat(sbModel.GetPdf())
+profll.SetOneSidedDiscovery(True)
+profll.SetVarName("q_{0}/2")
+
+# Need to throw toys
+toymcs = R.RooStats.ToyMCSampler(profll, 50)
+if not sbModel.GetPdf().canBeExtended():
+    toymcs.SetNEventsPerToy(1)
+    print('\nAdjusting for non-extended formalism\n')
+
+# Run the test
+fqResult = fc.GetHypoTest()
+fqResult.Print()
+fqResult.GetNullDistribution().SetTitle("b only")
+fqResult.GetAltDistribution().SetTitle("s+b")
+fqResult.Print()
+pvalue_fq = fqResult.NullPValue()
+
+# Plot the distributions of the test statistic
+c = R.TCanvas()
+plot = R.RooStats.HypoTestPlot(fqResult)
+plot.SetLogYaxis(True)
+
+# add chi2 to plot, to check the asymptotic behavior
+nPOI = 1
+fchi = R.TF1("f", "1*ROOT::Math::chisquared_pdf(2*x,{0},0)".format(nPOI), 0, 20)
+fchi.SetLineColor(R.kBlack)
+fchi.SetLineStyle(7)
+plot.AddTF1(fchi, "#chi^{{2}}(2x,{0})".format(nPOI))
+plot.Draw()
+c.Draw()
+
+c.SaveAs("test_p0_1.png")
+c.SaveAs("test_p0_1.root")
