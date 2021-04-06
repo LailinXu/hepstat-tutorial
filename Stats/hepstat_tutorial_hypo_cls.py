@@ -74,6 +74,7 @@ w.Print()
 # =======================
 # NOTE here `null` is the S+B model, and the alternative is the B model, the one we want to disapprove
 ac = R.RooStats.AsymptoticCalculator(data, bModel, sbModel)
+# Do one-sided for upper limits
 ac.SetOneSided(True)
 
 # HypoTestInverter
@@ -88,13 +89,13 @@ calc.SetVerbose(False)
 # Get the hypo test result
 r = calc.GetInterval()
 
+# compute expected limit
 med = r.GetExpectedUpperLimit(0)
 m2 = r.GetExpectedUpperLimit(-2)
 m1 = r.GetExpectedUpperLimit(-1)
 p1 = r.GetExpectedUpperLimit(1)
 p2 = r.GetExpectedUpperLimit(2)
-# compute expected limit
-print("Expected upper limits: " )
+print("Expected upper limits from AsymptoticCalculator: " )
 print(" expected limit (median) " , med)
 print(" expected limit (-2 sig) " , m2)
 print(" expected limit (-1 sig) " , m1)
@@ -109,6 +110,7 @@ poi.Print()
 fc = R.RooStats.FrequentistCalculator(data, bModel, sbModel)
 # null toys, alt toys
 fc.SetToys(2500,1000)
+
 # Test statistics: profile liekelihood
 profll = R.RooStats.ProfileLikelihoodTestStat(sbModel.GetPdf())
 profll.SetOneSided(True)
@@ -133,15 +135,16 @@ poimax = poi.getMax()
 calc.SetFixedScan(npoints,poimin,poimax)
 
 # Get the hypo test result
+# WARNING: this step can be a bit time consuming, as for each scan, toys need to be run to calculate the p-value
 r = calc.GetInterval()
 
+# compute expected limit
 med = r.GetExpectedUpperLimit(0)
 m2 = r.GetExpectedUpperLimit(-2)
 m1 = r.GetExpectedUpperLimit(-1)
 p1 = r.GetExpectedUpperLimit(1)
 p2 = r.GetExpectedUpperLimit(2)
-# compute expected limit
-print("Expected upper limits: " )
+print("Expected upper limits from FrequentistCalculator: " )
 print(" expected limit (median) " , med)
 print(" expected limit (-2 sig) " , m2)
 print(" expected limit (-1 sig) " , m1)
