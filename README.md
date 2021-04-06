@@ -79,7 +79,7 @@ Tips and requirements:
 
 ### Hypothesis test, Confidence intervals and Exclusion limits
 
-#### Hands-on 4: [Histfactory example](Fitting/hepstat_tutorial_histfactory.py.nbconvert.ipynb)
+#### Hands-on 4: [Histfactory example](Stats/hepstat_tutorial_histfactory.py.nbconvert.ipynb)
 
 Create a [workspace](https://root.cern.ch/doc/master/classRooWorkspace.html) using [HistFactory](https://root.cern/doc/master/group__HistFactory.html). 
 
@@ -96,13 +96,13 @@ pdf = n_bkg * bkg(x,a0,a1) + mu * n_sig * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * s
  * Create a workspace using Workspace Factory
  * Example operations at the workspace level
 
-#### Hands-on 5: [Build a workspace using histograms](Fitting/hepstat_tutorial_histfactory_hists.py.nbconvert.ipynb)
+#### Hands-on 5: [Build a workspace using histograms](Stats/hepstat_tutorial_histfactory_hists.py.nbconvert.ipynb)
 
-In the above example ([Histfactory example](Fitting/hepstat_tutorial_histfactory.py.nbconvert.ipynb)), a workspace is built using parametrized functions.  In reality, non-parametrized PDFs are more often being used, for example, from Monte Carlo simulations. In this example, we build a workspace using histograms, and we also show you how to include systematic uncertainties in the likelihood model. Our objectives are:
+In the above example ([Histfactory example](Stats/hepstat_tutorial_histfactory.py.nbconvert.ipynb)), a workspace is built using parametrized functions.  In reality, non-parametrized PDFs are more often being used, for example, from Monte Carlo simulations. In this example, we build a workspace using histograms, and we also show you how to include systematic uncertainties in the likelihood model. Our objectives are:
   * Create a workspace using histograms
   * Include systematic uncertainties
 
-#### Hands-on 6: [Null hypothesis significance test](Fitting/hepstat_tutorial_hypo_p0.py.nbconvert.ipynb)
+#### Hands-on 6: [Null hypothesis significance test](Stats/hepstat_tutorial_hypo_p0.py.nbconvert.ipynb)
 
 `RooStats` example: compute the p0 and significance (Hypothesis Test) 
 The signal is a simple Gaussian and the background is a smoothly falling spectrum. To estimate the significance,
