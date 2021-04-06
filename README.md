@@ -116,3 +116,11 @@ Objectives of this tutorial are the following:
  * Compute the significance using frequentist method
  * Plot the p0 scan as a function of the signal mass
 
+#### Hands-on 7: [CLs upper limits](Stats/hepstat_tutorial_hypo_cls.py.nbconvert.ipynb)
+
+Use the [StandardHypoTestInvDemo](https://root.cern/doc/master/StandardHypoTestInvDemo_8C.html) tutorial macro to perform an inverted hypothesis test for computing an interval (one-sided upper limits). This macro will perform a scan of the p-values for computing the upper limit. Both asymptotic and frequentist methos will be shown.
+
+Objectives of this tutorial are the following:
+* Create the HypoTestInverter class and configure it
+* Compute the CLs upper limits using the asymptotic formula
+* Compute the CLs upper limits using the frequentist method (time consuming)
