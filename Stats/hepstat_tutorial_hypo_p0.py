@@ -45,7 +45,7 @@ tf = R.TFile.Open(wsfile, "READ")
 w = tf.Get("myws")
 
 # data
-data = w.obj("obsData")
+data = w.data("obsData")
 
 # The S+B model (Alternative hypo)
 sbModel = w.obj("ModelConfig")
