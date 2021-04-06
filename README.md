@@ -11,6 +11,7 @@
 * ROOT Tutorials, 2015, https://twiki.cern.ch/twiki/bin/view/Main/ROOTRioTutorial 
 * [RooFit reference slides](http://indico.in2p3.fr/materialDisplay.py?contribId=15&materialId=slides&confId=750) - by Wouter Verkerke, one of RooFit authors
 * [RooFit tutorials](http://root.cern.ch/root/html/tutorials/roofit/index.html) - a set of working macros that showcase all major features of RooFit
+* [HistFactory](https://cds.cern.ch/record/1456844)
 * [RooStats Manual](https://twiki.cern.ch/twiki/pub/RooStats/WebHome/RooStats_UsersGuide.pdf) - concise, contains clear summary of statistics concepts and definitions
 * [RooStats tutorial](http://indico.cern.ch/getFile.py/access?contribId=0&sessionId=1&resId=0&materialId=slides&confId=118720) - by Kyle Cranmer, one of the RooStats developers
 * [RooStats tutorials](http://root.cern.ch/root/html/tutorials/roostats/index.html) - a set of working macros that showcase all major features of RooStats
@@ -78,4 +79,40 @@ Tips and requirements:
 
 ### Hypothesis test, Confidence intervals and Exclusion limits
 
-To be added.
+#### Hands-on 4: [Histfactory example](Fitting/hepstat_tutorial_histfactory.py.nbconvert.ipynb)
+
+Create a [workspace](https://root.cern.ch/doc/master/classRooWorkspace.html) using [HistFactory](https://root.cern/doc/master/group__HistFactory.html). 
+
+RooWorkspace is a persistable container for RooFit projects.
+It can contain and own variables, p.d.f.s, functions and datasets. The entire RooWorkspace can be saved into a ROOT TFile and organises the consistent streaming of its contents without duplication.
+
+`HistFactory` is a package that creates a RooFit probability density function from ROOT histograms of expected distributions and histograms that represent the +/- 1 sigma variations from systematic effects. The resulting probability density function, or a `RooWorkspace`, can then be used with any of the statistical tools provided within RooStats, such as the profile likelihood ratio, Feldman-Cousins, etc.
+
+In this tutorial, the model is basically the same as [hepstat_tutorial_roofit_extended.py](https://gitee.com/lailinxu/hepstat-tutorial/blob/master/Fitting/hepstat_tutorial_roofit_extended.py.nbconvert.ipynb): i.e, composite p.d.f with signal and background component
+```
+pdf = n_bkg * bkg(x,a0,a1) + mu * n_sig * (f_sig1 * sig1(x,m,s1 + (1-f_sig1) * sig2(x,m,s2)))
+```
+ and our goals are the following:
+ * Create a workspace using Workspace Factory
+ * Example operations at the workspace level
+
+#### Hands-on 5: [Build a workspace using histograms](Fitting/hepstat_tutorial_histfactory_hists.py.nbconvert.ipynb)
+
+In the above example ([Histfactory example](Fitting/hepstat_tutorial_histfactory.py.nbconvert.ipynb)), a workspace is built using parametrized functions.  In reality, non-parametrized PDFs are more often being used, for example, from Monte Carlo simulations. In this example, we build a workspace using histograms, and we also show you how to include systematic uncertainties in the likelihood model. Our objectives are:
+  * Create a workspace using histograms
+  * Include systematic uncertainties
+
+#### Hands-on 6: [Null hypothesis significance test](Fitting/hepstat_tutorial_hypo_p0.py.nbconvert.ipynb)
+
+`RooStats` example: compute the p0 and significance (Hypothesis Test) 
+The signal is a simple Gaussian and the background is a smoothly falling spectrum. To estimate the significance,
+we need to perform an hypothesis test. We want to disprove the null model, i.e the background only model against the alternate model,
+the background plus the signal. In RooStats, we do this by defining two two ModelConfig objects, one for the null model
+(the background only model in this case) and one for the alternate model (the signal plus background).
+
+Objectives of this tutorial are the following:
+ * Compute the null hypo significance using the Asymptotic calculator
+ * Compute the significance by hand using the asymptotic formula
+ * Compute the significance using frequentist method
+ * Plot the p0 scan as a function of the signal mass
+
