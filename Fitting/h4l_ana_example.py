@@ -41,7 +41,11 @@ for ie in range(nevt_max):
   
   # 4-momentum of leptons
   tlz_leps = []
-  for il in range(len(tr.lep_pt)):    
+
+  # At least 4 leptons
+  nlep = len(tr.lep_pt)
+  if nlep < 4: continue
+  for il in range(4):
     tlz_l = R.TLorentzVector()
     tlz_l.SetPtEtaPhiE(tr.lep_pt[il], tr.lep_eta[il], tr.lep_phi[il], tr.lep_E[il])
 
