@@ -138,18 +138,22 @@ print("==> Asymmptotic signficance: ", obs_sig)
 w.loadSnapshot(snapshotName_init)
 poi.Print()
 fc = R.RooStats.FrequentistCalculator(data, sbModel, bModel)
-# null toys, alt toys
-fc.SetToys(2500,1000)
 # Test statistics: profile liekelihood
 profll = R.RooStats.ProfileLikelihoodTestStat(sbModel.GetPdf())
 profll.SetOneSidedDiscovery(True)
 profll.SetVarName("q_{0}/2")
 
 # Need to throw toys
-toymcs = R.RooStats.ToyMCSampler(profll, 50)
+toymcs = fc.GetTestStatSampler()
 if not sbModel.GetPdf().canBeExtended():
     toymcs.SetNEventsPerToy(1)
     print('\nAdjusting for non-extended formalism\n')
+
+# Set the test stat
+toymcs.SetTestStatistic(profll)
+
+# Set number of toys: null toys, alt toys
+fc.SetToys(2500,1000)
 
 # Run the test
 fqResult = fc.GetHypoTest()
