@@ -20,7 +20,7 @@
 ## \author Lailin XU
 ## Based on the example [here](https://www.nikhef.nl/~vcroft/RooStats.html), and also [StandardHypoTestInvDemo.C](https://root.cern/doc/master/StandardHypoTestInvDemo_8C.html)
 
-import os
+import os, sys
 # Import the ROOT libraries
 import ROOT as R
 from math import pow, sqrt, fabs
@@ -73,6 +73,11 @@ w.Print()
 # Asymptotic calculator
 # =======================
 # NOTE here `null` is the S+B model, and the alternative is the B model, the one we want to disapprove
+#
+# See more details about [RooStats::AsymptoticCalculator](https://root.cern/doc/v608/classRooStats_1_1AsymptoticCalculator.html)
+# The calculator provides methods to produce the Asimov dataset, i.e a dataset generated where the observade values are equal to the expected ones. The Asimov data set is then used to compute the observed asymptotic p-value for the alternate hypothesis and the asympotic expected p-values.
+
+# The asymptotic formulae are valid only for one POI (parameter of interest). So the calculator works only for one-dimesional (one POI) model. If more than one POI exists consider as POI only the first one is used.
 ac = R.RooStats.AsymptoticCalculator(data, bModel, sbModel)
 # Do one-sided for upper limits
 ac.SetOneSided(True)
@@ -102,24 +107,45 @@ print(" expected limit (-1 sig) " , m1)
 print(" expected limit (+1 sig) " , p1)
 print(" expected limit (+2 sig) " , p2)
 
+# Plot the distributions of the test statistic
+plot = R.RooStats.HypoTestInverterPlot("HTI_Result_Plot","HypoTest Scan Result",r)
+c = R.TCanvas("HypoTestInverter Scan: Asymptotic")
+c.SetLogy(False)
+plot.Draw("CLb 2CL")
+c.Draw()
+
+c.SaveAs("test_cls_asym_1.png")
+c.SaveAs("test_cls_asym_1.root")
 
 # The frequentist appproach
 # =======================
+# [RooStats::FrequentistCalculator](https://root.cern/doc/master/classRooStats_1_1FrequentistCalculator.html)
+# Hypothesis Test Calculator using a full frequentist procedure for sampling the test statistic distribution. The nuisance parameters are fixed to their MLEs. The use of ToyMCSampler as the TestStatSampler is assumed.
+
 w.loadSnapshot(snapshotName_init)
 poi.Print()
 fc = R.RooStats.FrequentistCalculator(data, bModel, sbModel)
-# null toys, alt toys
-fc.SetToys(2500,1000)
 
 # Test statistics: profile liekelihood
 profll = R.RooStats.ProfileLikelihoodTestStat(sbModel.GetPdf())
 profll.SetOneSided(True)
 
 # Need to throw toys
-toymcs = R.RooStats.ToyMCSampler(profll, 50)
+toymcs = fc.GetTestStatSampler()
 if not sbModel.GetPdf().canBeExtended():
     toymcs.SetNEventsPerToy(1)
     print('\nAdjusting for non-extended formalism\n')
+
+# Set the test stat
+toymcs.SetTestStatistic(profll)
+
+# null toys, alt toys
+fc.SetToys(2500,1000)
+
+# Use multicore to speed up. Enable proof
+mNWorkers=4
+pc=R.RooStats.ProofConfig(w, mNWorkers, "", R.kFALSE)
+toymcs.SetProofConfig(pc)    
 
 # HypoTestInverter
 calc = R.RooStats.HypoTestInverter(fc)
@@ -153,10 +179,10 @@ print(" expected limit (+2 sig) " , p2)
 
 # Plot the distributions of the test statistic
 plot = R.RooStats.HypoTestInverterPlot("HTI_Result_Plot","HypoTest Scan Result",r)
-c = R.TCanvas("HypoTestInverter Scan")
+c = R.TCanvas("HypoTestInverter Scan: Frequentist")
 c.SetLogy(False)
 plot.Draw("CLb 2CL")
 c.Draw()
 
-c.SaveAs("test_cls_1.png")
-c.SaveAs("test_cls_1.root")
+c.SaveAs("test_cls_frq_1.png")
+c.SaveAs("test_cls_frq_1.root")
