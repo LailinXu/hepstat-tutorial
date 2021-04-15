@@ -1,7 +1,7 @@
 
 ## Jupyter Notebook
 
-Some instruction to use [Jupyter Noteboo](https://jupyter.org/).
+Some instruction to use [Jupyter Notebook](https://jupyter.org/).
 For CERN users, it's also possible to use [SWAN](https://swan.web.cern.ch/) directly with ROOT+Python+Jupyter binding and kernel service.
 
 ### Jupyter
@@ -15,7 +15,7 @@ Other options of installation can be found [here](https://jupyter.readthedocs.io
 
 #### Running the Notebook
 ```
-https://jupyter.readthedocs.io/en/latest/running.html
+jupyter notebook
 ```
 This will print some information about the notebook server in your terminal, and open your default web browser to this URL.
 
