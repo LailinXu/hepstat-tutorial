@@ -6,10 +6,26 @@ For CERN users, it's also possible to use [SWAN](https://swan.web.cern.ch/) dire
 
 ### Jupyter
 
-Installation
+#### Installation
 ```
 pip3 install jupyter
 ```
+
+Other options of installation can be found [here](https://jupyter.readthedocs.io/en/latest/install.html).
+
+#### Running the Notebook
+```
+https://jupyter.readthedocs.io/en/latest/running.html
+```
+This will print some information about the notebook server in your terminal, and open your default web browser to this URL.
+
+The following code should open the given notebook in the currently running notebook server, starting one if necessary.
+```
+jupyter notebook notebook.ipynb
+```
+
+More details can be found from the official [users guide](https://jupyter.readthedocs.io/en/latest/running.html).
+
 
 ### Convert `C` marcos or `pyroot` macros to notebooks
 
