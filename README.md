@@ -75,7 +75,7 @@ Tips and requirements:
 * Step 1: Fit the mass peak, compare binned and unbinned fit results, using 20 and 500 events, respectively (four fits in total)
 * Step 2: fix the mass peak and fit the signal and background yields
 
-When the Higgs boson was discovered in 2012, there were about 20 events in H4l channel within the mass range of 110 GeV to 160 GeV, see Fig.2 of [ATLAS Higgs discovery paper](https://arxiv.org/abs/1207.7214). With LHC Run-2 data, there are about 500 events in this mass range, see Fig. 5 of https://arxiv.org/abs/2004.03447.
+When the Higgs boson was discovered in 2012, there were about 20 events in the H4l channel within the mass range of 110 GeV to 160 GeV, see Fig.2 of the [ATLAS Higgs discovery paper](https://arxiv.org/abs/1207.7214). With LHC Run-2 data, there are about 500 events in this mass range, see Fig. 5 of https://arxiv.org/abs/2004.03447.
 
 
 ### Hypothesis test, Confidence intervals and Exclusion limits
