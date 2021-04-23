@@ -72,9 +72,10 @@ The (Monte Carlo) data is a Ttree with lepton four-vector informaiton available.
 Tips and requirements:
 * Construct a `S+B` model: S: signal, Gaussian, B: background, polynomial
 * Restrict to the mass range of 110 GeV to 160 GeV
-* Step 1: Fit the mass peak, compare binned and unbinned fit results, using 20 and 500 events, respectively
+* Step 1: Fit the mass peak, compare binned and unbinned fit results, using 20 and 500 events, respectively (four fits in total)
 * Step 2: fix the mass peak and fit the signal and background yields
 
+When the Higgs boson was discovered in 2012, there were about 20 events in H4l channel within the mass range of 110 GeV to 160 GeV, see Fig.2 of [ATLAS Higgs discovery paper](https://arxiv.org/abs/1207.7214). With LHC Run-2 data, there are about 500 events in this mass range, see Fig. 5 of https://arxiv.org/abs/2004.03447.
 
 
 ### Hypothesis test, Confidence intervals and Exclusion limits
@@ -114,7 +115,6 @@ Objectives of this tutorial are the following:
  * Compute the null hypo significance using the Asymptotic calculator
  * Compute the significance by hand using the asymptotic formula
  * Compute the significance using frequentist method
- * Plot the p0 scan as a function of the signal mass
 
 #### Hands-on 7: [CLs upper limits](Stats/hepstat_tutorial_hypo_cls.py.nbconvert.ipynb)
 
@@ -124,3 +124,8 @@ Objectives of this tutorial are the following:
 * Create the HypoTestInverter class and configure it
 * Compute the CLs upper limits using the asymptotic formula
 * Compute the CLs upper limits using the frequentist method (time consuming)
+
+#### Homework (Optional)
+Use the workspaces created from [Build a workspace using histograms](Stats/hepstat_tutorial_histfactory_hists.py.nbconvert.ipynb):
+ * Plot the p0 scan as a function of the signal mass
+ * Plot the CLs upper limits as a function of the signal mass
