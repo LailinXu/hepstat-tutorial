@@ -63,6 +63,7 @@ def loop_tr(infile="", outfile="test.root", debug=0):
 
   for i in range(nevents):
     tr.GetEntry(i)
+    if i%1000 ==0: print("Events processed: {0}".format(i))
 
     l_wt=[]
     l_tlz_t = []
@@ -276,4 +277,8 @@ if __name__ == "__main__":
 
   infile="../Gridpack/Zp1TeV_ttbar_inc_2lep_gridpack_evgen/Run_10/delphes_events.root"
   outfile="test.root"
+  if len(sys.argvv)>=3:
+    infile=sys.argvv[1] 
+    infile=sys.argvv[2]
+
   loop_tr(infile, outfile)
