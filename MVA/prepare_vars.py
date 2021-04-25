@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import ROOT as R
 import numpy as np
 from math import fabs
@@ -277,8 +278,8 @@ if __name__ == "__main__":
 
   infile="../Gridpack/Zp1TeV_ttbar_inc_2lep_gridpack_evgen/Run_10/delphes_events.root"
   outfile="test.root"
-  if len(sys.argvv)>=3:
-    infile=sys.argvv[1] 
-    infile=sys.argvv[2]
+  if len(sys.argv)>=3:
+    infile=sys.argv[1] 
+    outfile=sys.argv[2]
 
   loop_tr(infile, outfile)

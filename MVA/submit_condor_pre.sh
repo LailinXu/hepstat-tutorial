@@ -112,7 +112,8 @@ if [ ! -d ${this_outpath} ]; then mkdir ${this_outpath} -p; fi
 
 for evnt in `less ${input_list_EVNT}`; do
   lname=`dirname ${evnt}`
-  output=${OUTPUTFOLDER}_${lname}_tree.root
+  fname=`basename ${lname}`
+  output=${OUTPUTFOLDER}_${fname}_tree.root
   echo "${evnt} ${output} ${this_outpath}" >> $condorInputFile
 done
 
