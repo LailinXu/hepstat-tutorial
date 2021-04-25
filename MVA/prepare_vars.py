@@ -4,7 +4,7 @@ import ROOT as R
 import numpy as np
 from math import fabs
 
-def loop_tr(infile="", outfile="test.root"):
+def loop_tr(infile="", outfile="test.root", debug=0):
 
   # Input file
   tfin=R.TFile(infile, "READ")
@@ -27,7 +27,7 @@ def loop_tr(infile="", outfile="test.root"):
   o_tlz_j1_pt, o_tlz_j1_eta, o_tlz_j1_phi, o_tlz_j1_m = np.empty((1), dtype="float32"), np.empty((1), dtype="float32"), np.empty((1), dtype="float32"), np.empty((1), dtype="float32")
   o_tlz_j2_pt, o_tlz_j2_eta, o_tlz_j2_phi, o_tlz_j2_m = np.empty((1), dtype="float32"), np.empty((1), dtype="float32"), np.empty((1), dtype="float32"), np.empty((1), dtype="float32")
   o_tlz_j3_pt, o_tlz_j3_eta, o_tlz_j3_phi, o_tlz_j3_m = np.empty((1), dtype="float32"), np.empty((1), dtype="float32"), np.empty((1), dtype="float32"), np.empty((1), dtype="float32")
-  nlep_good, njets_good=np.empty((1), dtype="float32"), np.empty((1), dtype="float32")
+  nlep_good, njets_good=np.empty((1), dtype="int"), np.empty((1), dtype="int")
   met, met_phi = np.empty((1), dtype="float32"), np.empty((1), dtype="float32")
   
   trout.Branch("mtt_truth", mtt_truth, "mtt_truth/F")
@@ -166,7 +166,8 @@ def loop_tr(infile="", outfile="test.root"):
       tlz_l.SetPtEtaPhiM(pt, eta, phi, m)
       l_tlz_mu.append(tlz_l)
       
-    print("pt_max_el1: {0}, pt_max_el2: {1}, pt_max_mu1: {2}, pt_max_mu2: {3}".format(pt_max_el1, pt_max_el2, pt_max_mu1, pt_max_mu2))
+    if debug:
+      print("pt_max_el1: {0}, pt_max_el2: {1}, pt_max_mu1: {2}, pt_max_mu2: {3}".format(pt_max_el1, pt_max_el2, pt_max_mu1, pt_max_mu2))
     # Leptons
     l_tlz_lep = []
     # Order by pt
@@ -225,7 +226,8 @@ def loop_tr(infile="", outfile="test.root"):
     if len(l_tlz_t)==2:
       mtt_truth[0] = (l_tlz_t[0] + l_tlz_t[1]).M()
     else:
-      print("ntops: ", len(l_tlz_t))
+      if debug:
+        print("ntops: ", len(l_tlz_t))
 
     # Fill Output tree
     if nlep_good[0]>=2 and njets_good[0]>=2:
@@ -239,7 +241,8 @@ def loop_tr(infile="", outfile="test.root"):
 
       tlz_lljj = o_tlz_l1 + o_tlz_l2+ o_tlz_j1+ o_tlz_j2
       mtt_reco[0] = tlz_lljj.M()
-      print("mtt= {0}, mtt_reco= {5}, nel= {1}, nmu= {2}, njet= {3}, met= {4}".format(mtt_truth[0], nel, nmu, njet, met[0], mtt_reco[0]))
+      if debug:
+        print("mtt= {0}, mtt_reco= {5}, nel= {1}, nmu= {2}, njet= {3}, met= {4}".format(mtt_truth[0], nel, nmu, njet, met[0], mtt_reco[0]))
 
       o_tlz_l1_pt[0] = o_tlz_l1.Pt()
       o_tlz_l1_eta[0] = o_tlz_l1.Eta()
