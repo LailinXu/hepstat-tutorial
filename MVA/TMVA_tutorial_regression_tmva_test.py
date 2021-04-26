@@ -21,6 +21,9 @@ def fill_hists(tr, tag):
   hname="BDT_{0}".format(tag)
   h3 = TH1F(hname, hname, nbins, xmin, xmax)
   h3.Sumw2()
+  hname="BDTG_{0}".format(tag)
+  h4 = TH1F(hname, hname, nbins, xmin, xmax)
+  h4.Sumw2()
   
   for i in range(nevents):
     tr.GetEntry(i)
@@ -28,11 +31,13 @@ def fill_hists(tr, tag):
     mtt_truth = tr.mtt_truth     
     # mtt_reco = tr.mtt_reco     
     BDT = tr.BDT     
+    BDTG = tr.BDTG     
     h1.Fill(mtt_truth)
     # h2.Fill(mtt_reco)
     h3.Fill(BDT)
+    h4.Fill(BDTG)
     
-  return [h1, h2, h3]
+  return [h1, h2, h3, h4]
 
 # Helper function to normalize hists
 def norm_hists(h):
@@ -60,8 +65,10 @@ myc.SetFillColor(0)
 myc.cd()
 
 # Train vs Test
+# ===============
+# BDT
 h1 = norm_hists(h_train[2])
-h1.GetXaxis().SetTitle("Regression m_{t#bar{t}} [GeV]")
+h1.GetXaxis().SetTitle("BDT Regression m_{t#bar{t}} [GeV]")
 h1.GetYaxis().SetTitle("A.U.")
 h1.Draw()
 h2 = norm_hists(h_test[2])
@@ -83,12 +90,12 @@ lg.Draw()
 myc.Draw()
 myc.SaveAs("TMVA_tutorial_reg_test_1.png")
 
-# Regression vs Target
-h1 = norm_hists(h_train[2])
-h1.GetXaxis().SetTitle("m_{t#bar{t}} [GeV]")
+# BDTG
+h1 = norm_hists(h_train[3])
+h1.GetXaxis().SetTitle("BDTG Regression m_{t#bar{t}} [GeV]")
 h1.GetYaxis().SetTitle("A.U.")
 h1.Draw()
-h2 = norm_hists(h_train[0])
+h2 = norm_hists(h_test[3])
 h2.SetLineColor(2)
 h2.SetMarkerColor(2)
 h2.Draw("same")
@@ -100,10 +107,40 @@ lg.SetBorderSize(0)
 lg.SetFillStyle(0)
 lg.SetTextFont(42)
 lg.SetTextSize(0.04)
-lg.AddEntry(h1, "Regression", "l")
-lg.AddEntry(h2, "Target", "l")
+lg.AddEntry(h1, "Training", "l")
+lg.AddEntry(h2, "Testing", "l")
 lg.Draw()
 
 myc.Draw()
 myc.SaveAs("TMVA_tutorial_reg_test_2.png")
+
+
+# Regression vs Target
+h1 = norm_hists(h_train[2])
+h1.GetXaxis().SetTitle("m_{t#bar{t}} [GeV]")
+h1.GetYaxis().SetTitle("A.U.")
+h1.Draw()
+h2 = norm_hists(h_train[3])
+h2.SetLineColor(2)
+h2.SetMarkerColor(2)
+h2.Draw("same")
+h3 = norm_hists(h_train[0])
+h3.SetLineColor(4)
+h3.SetMarkerColor(4)
+h3.Draw("same")
+
+# Draw legends
+lIy = 0.92
+lg = TLegend(0.60, lIy-0.25, 0.85, lIy)
+lg.SetBorderSize(0)
+lg.SetFillStyle(0)
+lg.SetTextFont(42)
+lg.SetTextSize(0.04)
+lg.AddEntry(h1, "Regression BDT", "l")
+lg.AddEntry(h2, "Regression BDTG", "l")
+lg.AddEntry(h3, "Target", "l")
+lg.Draw()
+
+myc.Draw()
+myc.SaveAs("TMVA_tutorial_reg_test_3.png")
 

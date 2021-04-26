@@ -28,13 +28,19 @@ dataloader.AddTarget('mtt_truth')
  
 dataloader.AddRegressionTree(tree, 1.0)
 dataloader.PrepareTrainingAndTestTree(TCut(''),
-        'nTrain_Regression=4000:SplitMode=Random:NormMode=NumEvents:!V')
+        'nTrain_Regression=10000:SplitMode=Random:NormMode=NumEvents:!V')
  
 # Generate model
  
 # BDT
 factory.BookMethod( dataloader,  TMVA.Types.kBDT, "BDT",
   "!H:!V:NTrees=100:MinNodeSize=1.0%:BoostType=AdaBoostR2:SeparationType=RegressionVariance:nCuts=20:PruneMethod=CostComplexity:PruneStrength=30" )
+factory.BookMethod( dataloader,  TMVA.Types.kBDT, "BDTG",
+  "!H:!V:NTrees=2000::BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=3:MaxDepth=4" )
+
+# Neural network (MLP)
+#factory.BookMethod( dataloader,  TMVA.Types.kMLP, "MLP",
+  #"!H:!V:VarTransform=Norm:NeuronType=tanh:NCycles=20000:HiddenLayers=N+20:TestRate=6:TrainingMethod=BFGS:Sampling=0.3:SamplingEpoch=0.8:ConvergenceImprove=1e-6:ConvergenceTests=15:!UseRegulator" )
  
 # Run TMVA
 factory.TrainAllMethods()
@@ -44,4 +50,4 @@ factory.EvaluateAllMethods()
 output.Close()
 
 # Launch the gui for the root macros
-TMVA.TMVARegGui(outfileName)
+#TMVA.TMVARegGui(outfileName)
