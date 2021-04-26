@@ -132,6 +132,18 @@ Use the workspaces created from [Build a workspace using histograms](Stats/hepst
 
 ### Machine learning: TMVA
 
+Consider a typical physics problem at the LHC: searching a heavy resonance decaying to a pair of top-quarks, with both top-quarks decaying semileptonically, i.e., `pp > Z' > tt, t>Wb, W->lv`. The signal is expected to have a resonance by looking at the invariant mass of the top-quark pair. The dominant background is the SM `tt` production, which is expected to fall smoothly in the high mass tail. This should be an easy task if one can reconstruct the invariant mass of the top-quark pair. But how? The final states are `llbb + missing energy` due to the neutrinos. It is not possible to fully reconstruct the invariant mass of the top-quark pair (mtt). More over, without such a powerful discriminant, `mtt`, it might be challenging to separate the signal from the dominant background. 
+
+This tutorial aims to solve two problems:
+* Use machine learning based regression to reconstruct, or infer, the mass `mtt`, based on the kinematic information of the experimental observables. 
+* Use machine learning based classification to separate the signal from the background.
+
+The following experimental observables are considered:
+* 4-momenta (`pT , η, ϕ, m`) of the 2 leptons (4+4)
+* 4-momenta (`pT , η, ϕ, m`) of the jets, at lest 2 jets and up to 3 jets (4+4+4)
+* missing ET and the phi angle (2)
+
+
 #### Hands-on: Regression with BDT
 
  * [Training of BDT regression](MVA/TMVA_tutorial_regression_tmva.py.nbconvert.ipynb)
@@ -149,10 +161,13 @@ Use the workspaces created from [Build a workspace using histograms](Stats/hepst
 
 Before you start this toturial, follow the instruction [here](README_pytorch.md) to set up the [PyTorch](https://pytorch.org/) docker environment.
 
+This ANN-based machine learning tutorial aims to solve the same problem as for the TMVA tutorial above. It would be interesting to compare the performance of BDT vs DNN.
+
+
 #### Hands-on: Regression with ANN
 
- * [Regression](MVA/DNN_example.ipynb)
+ * [Regression](MVA/DNN_example.ipynb) (the first part)
 
 #### Hands-on: Classification with ANN
 
- * [Classification](MVA/DNN_example.ipynb)
+ * [Classification](MVA/DNN_example.ipynb) (the second part)

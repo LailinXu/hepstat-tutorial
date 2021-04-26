@@ -13,7 +13,7 @@ This docker has both `ROOT TMVA` and `PyTorch` environments available.
 
 Launch the docker:
 ```
-docker run -it --name="anaconda" -p 8888:8888 nyanyanyanyanyanya/ml_anaconda  /bin/bash
+docker run -it --name="anaconda" -p 8888:8888 -v $PWD:/host nyanyanyanyanyanya/ml_anaconda  /bin/bash
 ```
 
 Then do the following in the command line:
