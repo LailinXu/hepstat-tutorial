@@ -140,7 +140,7 @@ Use the workspaces created from [Build a workspace using histograms](Stats/hepst
 
 #### Hands-on: Classification with BDT
 
- * [Training of BDT classification](MVA/TMVA_tutorial_classification_tmva.py.nbconvert.ipynb)
+ * [Training of BDT classification](MVA/TMVA_tutorial_classification_tmva.py.ipynb)
  * [Testing/validation](MVA/TMVA_tutorial_classification_tmva_test.py.nbconvert.ipynb)
  * [Application](MVA/TMVA_tutorial_classification_tmva_app.py.nbconvert.ipynb)
 
