@@ -129,3 +129,27 @@ Objectives of this tutorial are the following:
 Use the workspaces created from [Build a workspace using histograms](Stats/hepstat_tutorial_histfactory_hists.py.nbconvert.ipynb):
  * Plot the p0 scan as a function of the signal mass
  * Plot the CLs upper limits as a function of the signal mass
+
+### Machine learning: TMVA
+
+#### Hands-on: Regression with BDT
+
+ * [Training of BDT regression](MVA/TMVA_tutorial_regression_tmva.py.nbconvert.ipynb)
+ * [Testing/validation](MVA/TMVA_tutorial_regression_tmva_test.py.nbconvert.ipynb)
+ * [Application](MVA/TMVA_tutorial_regression_tmva_app.py.nbconvert.ipynb)
+
+#### Hands-on: Classification with BDT
+
+ * [Training of BDT classification](MVA/TMVA_tutorial_classification_tmva.py.nbconvert.ipynb)
+ * [Testing/validation](MVA/TMVA_tutorial_classification_tmva_test.py.nbconvert.ipynb)
+ * [Application](MVA/TMVA_tutorial_classification_tmva_app.py.nbconvert.ipynb)
+
+
+### Machine learning: Artificial Neural Networks with PyTorch
+
+Before you start this toturial, follow the instruction [here](README_pytorch.md) to set up the [PyTorch](https://pytorch.org/) docker environment.
+
+#### Hands-on: Regression with ANN
+
+
+#### Hands-on: Classification with ANN
