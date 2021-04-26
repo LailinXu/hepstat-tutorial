@@ -1,3 +1,16 @@
+## \file
+## \ingroup tutorial_tmva
+## \notebook
+## TMVA example, for regression
+##  with following objectives:
+##  * Test a BDT with TMVA
+##
+## \macro_image
+## \macro_output
+## \macro_code
+##
+## \author Lailin XU
+
 from ROOT import TMVA, TFile, TTree, TCut, TH1F, TCanvas, gROOT, TLegend
 from subprocess import call
 from os.path import isfile

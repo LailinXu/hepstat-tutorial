@@ -1,3 +1,16 @@
+## \file
+## \ingroup tutorial_tmva
+## \notebook
+## TMVA example, for regression
+##  with following objectives:
+##  * Apply a BDT with TMVA
+##
+## \macro_image
+## \macro_output
+## \macro_code
+##
+## \author Lailin XU
+
 from ROOT import TMVA, TFile, TTree, TCut, TH1F, TCanvas, gROOT, TLegend
 from subprocess import call
 from os.path import isfile
@@ -31,15 +44,19 @@ for branch in tree.GetListOfBranches():
 # Book method(s)
 # =============
 # BDT
-methodName = "BDT"
-weightfile = 'dataset/weights/TMVARegression_{0}.weights.xml'.format(methodName)
-reader.BookMVA( methodName, weightfile )
+methodName1 = "BDT"
+weightfile = 'dataset/weights/TMVARegression_{0}.weights.xml'.format(methodName1)
+reader.BookMVA( methodName1, weightfile )
+# BDTG
+methodName2 = "BDTG"
+weightfile = 'dataset/weights/TMVARegression_{0}.weights.xml'.format(methodName2)
+reader.BookMVA( methodName2, weightfile )
 
 # Loop events
 nevents = tree.GetEntries()
 
 # Book histograms
-tag = methodName
+tag = "SM"
 hname="mtt_truth_{0}".format(tag)
 nbins, xmin, xmax=200, 0, 2000
 h1 = TH1F(hname, hname, nbins, xmin, xmax)
@@ -50,16 +67,23 @@ h2.Sumw2()
 hname="BDT_{0}".format(tag)
 h3 = TH1F(hname, hname, nbins, xmin, xmax)
 h3.Sumw2()
+hname="BDTG_{0}".format(tag)
+h4 = TH1F(hname, hname, nbins, xmin, xmax)
+h4.Sumw2()
 
 for i in range(nevents):
   tree.GetEntry(i)
 
   mtt_truth = tree.mtt_truth     
   mtt_reco = tree.mtt_reco     
-  BDT = reader.EvaluateMVA(methodName)
+  # BDT = reader.EvaluateMVA(methodName1)
+  # BDTG = reader.EvaluateMVA(methodName2)
+  BDT = reader.EvaluateRegression(methodName1)[0]
+  BDTG = reader.EvaluateRegression(methodName2)[0]
   h1.Fill(mtt_truth)
   h2.Fill(mtt_reco)
   h3.Fill(BDT)
+  h4.Fill(BDTG)
 
 # Helper function to normalize hists
 def norm_hists(h):
@@ -79,7 +103,7 @@ myc = TCanvas("c", "c", 800, 600)
 myc.SetFillColor(0)
 myc.cd()
 
-# Train vs Test
+# Compare the performance
 nh1 = norm_hists(h1)
 nh1.GetXaxis().SetTitle("m_{t#bar{t}} [GeV]")
 nh1.GetYaxis().SetTitle("A.U.")
@@ -92,6 +116,10 @@ nh3 = norm_hists(h3)
 nh3.SetLineColor(4)
 nh3.SetMarkerColor(4)
 nh3.Draw("same")
+nh4 = norm_hists(h4)
+nh4.SetLineColor(5)
+nh4.SetMarkerColor(5)
+nh4.Draw("same")
 
 ymin = 0
 ymax = max(nh1.GetMaximum(), nh2.GetMaximum(), nh3.GetMaximum())
@@ -106,7 +134,8 @@ lg.SetTextFont(42)
 lg.SetTextSize(0.04)
 lg.AddEntry(nh1, "Truth", "l")
 lg.AddEntry(nh2, "Reco", "l")
-lg.AddEntry(nh3, "Regression", "l")
+lg.AddEntry(nh3, "Regression BDT", "l")
+lg.AddEntry(nh4, "Regression BDTG", "l")
 lg.Draw()
 
 myc.Draw()

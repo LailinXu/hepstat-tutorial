@@ -1,3 +1,17 @@
+## \file
+## \ingroup tutorial_tmva
+## \notebook
+## TMVA example, for regression
+##  with following objectives:
+##  * Train a BDT with TMVA
+##
+## \macro_image
+## \macro_output
+## \macro_code
+##
+## \author Lailin XU
+## Modified from [RegressionKeras.py](https://root.cern/doc/master/RegressionKeras_8py.html) and [TMVARegression.C](https://root.cern/doc/master/TMVARegression_8C.html)
+
 from ROOT import TMVA, TFile, TTree, TCut
 from subprocess import call
 from os.path import isfile
@@ -8,8 +22,7 @@ TMVA.Tools.Instance()
  
 outfileName = 'TMVA_tutorial_reg_1.root'
 output = TFile.Open(outfileName, 'RECREATE')
-factory = TMVA.Factory('TMVARegression', output,
-        '!V:!Silent:Color:DrawProgressBar:Transformations=D,G:AnalysisType=Regression')
+factory = TMVA.Factory('TMVARegression', output, '!V:!Silent:Color:DrawProgressBar:Transformations=D,G:AnalysisType=Regression')
  
 # Load data
 trfile = "SM_ttbar.root"
@@ -17,7 +30,10 @@ if not isfile('tmva_reg_example.root'):
     call(['curl', '-L', '-O', 'http://root.cern.ch/files/tmva_reg_example.root'])
  
 data = TFile.Open(trfile)
-tree = data.Get('tree')
+if not data:
+  print("Error! file not opened", trfile)
+trname = "tree"
+tree = data.Get(trname)
  
 dataloader = TMVA.DataLoader('dataset')
 for branch in tree.GetListOfBranches():
@@ -27,8 +43,7 @@ for branch in tree.GetListOfBranches():
 dataloader.AddTarget('mtt_truth')
  
 dataloader.AddRegressionTree(tree, 1.0)
-dataloader.PrepareTrainingAndTestTree(TCut(''),
-        'nTrain_Regression=10000:SplitMode=Random:NormMode=NumEvents:!V')
+dataloader.PrepareTrainingAndTestTree(TCut(''), 'nTrain_Regression=10000:SplitMode=Random:NormMode=NumEvents:!V')
  
 # Generate model
  
@@ -48,6 +63,3 @@ factory.TestAllMethods()
 factory.EvaluateAllMethods()
 
 output.Close()
-
-# Launch the gui for the root macros
-#TMVA.TMVARegGui(outfileName)
