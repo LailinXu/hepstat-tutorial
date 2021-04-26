@@ -151,5 +151,8 @@ Before you start this toturial, follow the instruction [here](README_pytorch.md)
 
 #### Hands-on: Regression with ANN
 
+ * [Regression](MVA/DNN_example.ipynb)
 
 #### Hands-on: Classification with ANN
+
+ * [Classification](MVA/DNN_example.ipynb)
