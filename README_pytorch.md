@@ -26,7 +26,7 @@ cd home/DNN
 
 Within the command line, open the notebook
 ```
-jupyter notebook --ip='*' --port=8888  --allow-root
+jupyter notebook --ip='*' --port=8888  --allow-root DNN_regression_example.ipynb
 ```
 
 Then open your browser that you can work with the notebook
