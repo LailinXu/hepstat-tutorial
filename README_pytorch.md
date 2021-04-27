@@ -18,7 +18,7 @@ docker run -it --name="anaconda" -p 8888:8888 -v $PWD:/host nyanyanyanyanyanya/m
 
 Then do the following in the command line:
 ```
-conda activete MLexample
+conda activate MLexample
 cd home/DNN
 ```
 
