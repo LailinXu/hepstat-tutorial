@@ -27,7 +27,7 @@ reader = TMVA.Reader("Color:!Silent")
 # Inputs
 # =============
 # Load data
-trfile = "SM_ttbar.root"
+trfile = "example_data/SM_ttbar.root"
  
 data = TFile.Open(trfile)
 tree = data.Get('tree')

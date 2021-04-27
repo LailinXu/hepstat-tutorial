@@ -30,17 +30,17 @@ reader_B = TMVA.Reader("Color:!Silent")
 # =============
 # Load data
 # An unknown sample
-trfile = "Zp2TeV_ttbar.root"
+trfile = "example_data/Zp2TeV_ttbar.root"
 data = TFile.Open(trfile)
 tree = data.Get('tree')
 
 # Known signal
-trfile_S = "Zp1TeV_ttbar.root"
+trfile_S = "example_data/Zp1TeV_ttbar.root"
 data_S = TFile.Open(trfile_S)
 tree_S = data_S.Get('tree')
 
 # Known background
-trfile_B = "SM_ttbar.root"
+trfile_B = "example_data/SM_ttbar.root"
 data_B = TFile.Open(trfile_B)
 tree_B = data_B.Get('tree')
  

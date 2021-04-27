@@ -34,9 +34,9 @@ factory = TMVA.Factory("TMVAClassification", output,
 # Load data
 # =======================
 # Background
-trfile_B = "SM_ttbar.root"
+trfile_B = "example_data/SM_ttbar.root"
 # Signal
-trfile_S = "Zp1TeV_ttbar.root"
+trfile_S = "example_data/Zp1TeV_ttbar.root"
 if not isfile('tmva_reg_example.root'):
     call(['curl', '-L', '-O', 'http://root.cern.ch/files/tmva_reg_example.root'])
  
