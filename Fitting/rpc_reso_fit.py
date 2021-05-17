@@ -143,6 +143,8 @@ print("DefaultMinimizerType: ", R.Math.MinimizerOptions.DefaultMinimizerType())
 myc.Clear()
 
 h_s.Draw()
+# Likelihood fit
+# h_s.Fit("gaus_s", "L")
 h_s.Fit("gaus_s")
 
 myc.Draw()
