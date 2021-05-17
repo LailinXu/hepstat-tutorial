@@ -85,7 +85,7 @@ def gaus_3d(x, par):
     for j in range(nd):
       r += R.TMatrixDRow(m_x_t, 0)[j] * R.TMatrixDRow(icov, i)[j] * R.TMatrixDRow(m_x, i)[0]
 
-  y = 1./(2*pi * sqrt(cov_d)) * exp( -0.5* r ) 
+  y = 1./(pow(2*pi, nd/2.) * sqrt(cov_d)) * exp( -0.5* r ) 
 
   return y
 
@@ -122,10 +122,15 @@ hz = h_s.ProjectionZ()
 
 myc.Clear()
 hx.Draw()
+myc.Draw()
 myc.SaveAs("{0}_1_X.png".format(pname))
+
 hy.Draw()
+myc.Draw()
 myc.SaveAs("{0}_1_Y.png".format(pname))
+
 hz.Draw()
+myc.Draw()
 myc.SaveAs("{0}_1_Z.png".format(pname))
 
 
