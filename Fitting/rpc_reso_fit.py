@@ -16,6 +16,7 @@ R.gROOT.SetStyle("ATLAS")
 R.gStyle.SetPalette(1)
 
 pname = "gaus_3D_test"
+tfout = R.TFile("{0}.root".format(pname), "RECREATE")
 
 # Helper function to print a matrx(m, n)
 def print_matrix(m_cov, md, nd):
@@ -101,7 +102,7 @@ g_s.SetParameter(5, 1.2)
 
 hname = "3D"
 h_s = R.TH3F(hname, hname, nbinsx, xmin, xmax, nbinsy, ymin, ymax, nbinsz, zmin, zmax)
-h_s.FillRandom("gaus_s", 10000)  
+h_s.FillRandom("gaus_s", 100)  
 
 h_s.GetXaxis().SetRangeUser(-3, 3)
 h_s.GetYaxis().SetRangeUser(-3, 3)
@@ -120,20 +121,25 @@ hx = h_s.ProjectionX()
 hy = h_s.ProjectionY()
 hz = h_s.ProjectionZ()
 
+# X-axis
 myc.Clear()
 hx.Draw()
 myc.Draw()
 myc.SaveAs("{0}_1_X.png".format(pname))
 
+# Y-axis
 hy.Draw()
 myc.Draw()
 myc.SaveAs("{0}_1_Y.png".format(pname))
 
+# Z-axis
 hz.Draw()
 myc.Draw()
 myc.SaveAs("{0}_1_Z.png".format(pname))
 
-
+# Fitting
+print("DefaultMinimizerAlgo: ", R.Math.MinimizerOptions.DefaultMinimizerAlgo())
+print("DefaultMinimizerType: ", R.Math.MinimizerOptions.DefaultMinimizerType())
 myc.Clear()
 
 h_s.Draw()
@@ -141,3 +147,56 @@ h_s.Fit("gaus_s")
 
 myc.Draw()
 myc.SaveAs("{0}_2.png".format(pname))
+
+# Check the fit results, by converting TF3 to TH3
+hf = g_s.CreateHistogram()
+npx = g_s.GetNpx()
+npy = g_s.GetNpy()
+npz = g_s.GetNpz()
+for ix in range(1, npx+1):
+  vx = hf.GetXaxis().GetBinCenter(ix)
+  for iy in range(1, npy+1):
+    vy = hf.GetYaxis().GetBinCenter(iy)
+    for iz in range(1, npz+1):
+      vz = hf.GetZaxis().GetBinCenter(iz)
+      vf = g_s.Eval(vx, vy, vz)
+      hf.SetBinContent(ix, iy, iz, vf)
+      
+hf.Print()
+
+# Projection
+hfx = hf.ProjectionX()
+hfy = hf.ProjectionY()
+hfz = hf.ProjectionZ()
+
+# X-axis
+myc.Clear()
+hx.Rebin()
+hx.Draw()
+hfx.SetLineColor(2)
+hfx.Draw("same")
+myc.Draw()
+myc.SaveAs("{0}_1_X_fit.png".format(pname))
+
+# Y-axis
+hy.Rebin()
+hy.Draw()
+hfy.SetLineColor(2)
+hfy.Draw("same")
+myc.Draw()
+myc.SaveAs("{0}_1_Y_fit.png".format(pname))
+
+# Z-axis
+hz.Rebin()
+hz.Draw()
+hfz.SetLineColor(2)
+hfz.Draw("same")
+myc.Draw()
+myc.SaveAs("{0}_1_Z_fit.png".format(pname))
+
+# Save files
+tfout.cd()
+h_s.Write()
+g_s.Write()
+hf.Write()
+tfout.Close()
