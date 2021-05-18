@@ -1,5 +1,6 @@
 /// \file
 /// \ingroup tutorial_fit
+/// \notebook
 /// example of fitting a 3D function
 ///
 /// \macro_output
@@ -133,11 +134,13 @@ void rpc_reso_fit() {
   myc->SaveAs(pname+"_1_X.png");
   
   // Y-axis
+  myc->Clear();
   hy->Draw();
   myc->Draw();
   myc->SaveAs(pname+"_1_Y.png");
   
   // Z-axis
+  myc->Clear();
   hz->Draw();
   myc->Draw();
   myc->SaveAs(pname+"_1_Z.png");
@@ -147,22 +150,26 @@ void rpc_reso_fit() {
   std::cout << "DefaultMinimizerType: " << ROOT::Math::MinimizerOptions::DefaultMinimizerType() << std::endl;
   myc->Clear();
 
+  myc->Clear();
   h_s->Draw();
   // Likelihood fit
-  //h_s->Fit("gaus_s", "L");
-  h_s->Fit("gaus_s");
+  h_s->Fit("gaus_s", "L");
+  // h_s->Fit("gaus_s");
   
   myc->Draw();
   myc->SaveAs(pname+"_2.png");
   
   // Check the fit results, by converting TF3 to TH3
-  TH3F *hf = (TH3F*)g_s->CreateHistogram();
   g_s->SetNpx(nbinsx);
   g_s->SetNpy(nbinsy);
   g_s->SetNpz(nbinsz);
   int npx = g_s->GetNpx();
   int npy = g_s->GetNpy();
   int npz = g_s->GetNpz();
+  std::cout << "npx: " << npx << " npy: " << npy << " npz: " << npz << std::endl;
+
+  TH3F *hf = (TH3F*)g_s->CreateHistogram();
+
   for(int ix=1; ix < npx+1; ix++) {
     float vx = hf->GetXaxis()->GetBinCenter(ix);
     for(int iy=1; iy < npy+1; iy++) {
@@ -184,37 +191,91 @@ void rpc_reso_fit() {
   
   // X-axis
   myc->Clear();
-  if(nbinsx > npx)
-    hx->Rebin();
+  // Normalization
+  float intx = hx->Integral();
+  hfx->Scale(intx/hfx->Integral());
+
+  float ym0 = hx->GetMinimum();
+  float ym1 = hx->GetMaximum();
+  float ym2 = hfx->GetMaximum();
+  if(ym1<ym2) ym1=ym2;
+  hx->GetYaxis()->SetRangeUser(ym0, ym1*1.2);
+
   hx->Draw();
   hfx->SetLineColor(2);
   hfx->Draw("same");
+
+  TLegend *lg = new TLegend(0.6, 0.7, 0.9, 0.9);
+  lg->SetBorderSize(0);
+  lg->SetFillStyle(0);
+  lg->SetTextFont(42);
+  lg->SetTextSize(0.04);
+  lg->AddEntry(hx, "X1", "l");
+  lg->AddEntry(hfx, "3D fit projection X", "l");
+  lg->Draw();
+
   myc->Draw();
   myc->SaveAs(pname+"_1_X_fit.png");
   
   // Y-axis
-  hy->Rebin();
-  if(nbinsy > npy)
-    hy->Draw();
+  myc->Clear();
+  // Normalization
+  float inty = hy->Integral();
+  hfy->Scale(inty/hfy->Integral());
+
+  ym0 = hy->GetMinimum();
+  ym1 = hy->GetMaximum();
+  ym2 = hfy->GetMaximum();
+  if(ym1<ym2) ym1=ym2;
+  hy->GetYaxis()->SetRangeUser(ym0, ym1*1.2);
+
+  hy->Draw();
   hfy->SetLineColor(2);
   hfy->Draw("same");
+
+  lg->Clear();
+  lg->AddEntry(hy, "X2", "l");
+  lg->AddEntry(hfy, "3D fit projection Y", "l");
+  lg->Draw();
+
   myc->Draw();
   myc->SaveAs(pname+"_1_Y_fit.png");
   
   // Z-axis
-  if(nbinsz > npz)
-    hz->Rebin();
+  myc->Clear();
+  // Normalization
+  float intz = hz->Integral();
+  hfz->Scale(intz/hfz->Integral());
+
+  ym0 = hz->GetMinimum();
+  ym1 = hz->GetMaximum();
+  ym2 = hfz->GetMaximum();
+  if(ym1<ym2) ym1=ym2;
+  hz->GetYaxis()->SetRangeUser(ym0, ym1*1.2);
+
   hz->Draw();
   hfz->SetLineColor(2);
   hfz->Draw("same");
+
+  lg->Clear();
+  lg->AddEntry(hz, "X3", "l");
+  lg->AddEntry(hfz, "3D fit projection Z", "l");
+  lg->Draw();
+
   myc->Draw();
   myc->SaveAs(pname+"_1_Z_fit.png");
 
   // Save files
   tfout->cd();
   h_s->Write();
+  hx->Write();
+  hy->Write();
+  hz->Write();
   g_s->Write();
   hf->Write();
+  hfx->Write();
+  hfy->Write();
+  hfz->Write();
   tfout->Close();
   
 }
