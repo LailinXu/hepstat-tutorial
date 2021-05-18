@@ -154,6 +154,7 @@ void rpc_reso_fit() {
   h_s->Draw();
   // Likelihood fit
   h_s->Fit("gaus_s", "L");
+  // Least-square fit
   // h_s->Fit("gaus_s");
   
   myc->Draw();
