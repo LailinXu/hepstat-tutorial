@@ -9,9 +9,20 @@
 /// \author Lailin Xu
 
 
+#include "TROOT.h"
+#include "TStyle.h"
+#include "TCanvas.h"
+#include "TLegend.h"
+#include "TFile.h"
 #include "TF3.h"
 #include "TH3F.h"
 #include "TError.h"
+#include "TMatrixD.h"
+#include "TMath.h"
+#include "Math/MinimizerOptions.h"
+#include "Math/GenAlgoOptions.h"
+#include "TStopwatch.h"
+#include "TVirtualFitter.h"
 
 // Helper function to print a matrx(m, n)
 void print_matrix(TMatrixD& m_cov, int md, int nd) {
@@ -79,9 +90,13 @@ void rpc_reso_fit() {
   gROOT->SetStyle("ATLAS");
   gStyle->SetPalette(1);
 
+  TStopwatch w;
+  w.Start();
+
   TString pname = "gaus_3D_test_C";
   TFile *tfout = new TFile(pname + ".root", "RECREATE");
 
+  const int nd = 3;
   
   // Plotting
   // =====================
@@ -99,9 +114,9 @@ void rpc_reso_fit() {
   // Fit
   int npar = 6; // mean: 3; sigma: 3
   TF3 *g_s = new TF3("gaus_s", gaus_3d, xmin, xmax, ymin, ymax, zmin, zmax, npar);
-  g_s->SetParameter(0, 0.);
+  g_s->SetParameter(0, -0.1);
   g_s->SetParameter(1, 0.);
-  g_s->SetParameter(2, 0.);
+  g_s->SetParameter(2, 0.2);
   g_s->SetParameter(3, 1.);
   g_s->SetParameter(4, 0.8);
   g_s->SetParameter(5, 1.2);
@@ -146,8 +161,14 @@ void rpc_reso_fit() {
   myc->SaveAs(pname+"_1_Z.png");
   
   // Fitting
+  TVirtualFitter::SetDefaultFitter("Minuit2"); // in case Minuit2 is available in your root installation
   std::cout << "DefaultMinimizerAlgo: " << ROOT::Math::MinimizerOptions::DefaultMinimizerAlgo() << std::endl;
   std::cout << "DefaultMinimizerType: " << ROOT::Math::MinimizerOptions::DefaultMinimizerType() << std::endl;
+  std::cout << "Precision: " << ROOT::Math::MinimizerOptions::DefaultPrecision() << std::endl;
+  for(int ip=0; ip < nd; ip ++ ) {
+    std::cout << "Step for ipar " << ip << " " << g_s->GetParError(ip) << std::endl;
+  }
+
   myc->Clear();
 
   myc->Clear();
@@ -278,5 +299,8 @@ void rpc_reso_fit() {
   hfy->Write();
   hfz->Write();
   tfout->Close();
+
+  w.Stop();
+  std::cout << "\nTime: \t: " << w.RealTime() << " , " << w.CpuTime() << std::endl;
   
 }
