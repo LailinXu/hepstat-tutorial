@@ -9,8 +9,9 @@ Proposed by Paul V.C Hough 1962
 
 ### Original Hough transform (Cartesian Coordinates)
 In image space line is defined by the slope m and the y-intercept b
-
+$$
 y=mx+b
+$$
 
 So to detect the line in the image space we have to define these parameters, which is not applicable in image domain. In the other domain with m and b coordinates, line represent a point from image domain. Points on the same line in image domain will be mapped to lines in Hough domain. These lines intersect with each other in a point with specific values m and b. These values are the slope and y-intercept of original line in image domain.
 
@@ -22,9 +23,10 @@ For example in the following image. Blue point in image domain was mapped to the
 More points that on same line tends to more lines in Hough domain and that will increase voting to the intersection point indicating that there is many points belongs to line in image domain with that slope and y-intercept.  [source](http://what-when-how.com/biomedical-image-analysis/the-hough-transform-biomedical-image-analysis/)
 
 ### Alternative Parameter Space (Polar Coordinates)
-Due to undefined value of slope for vertical lines in cartesian coordinates, we have to move to polar coordinates. In polar coordinates line is define by ρ and θ where ρ is the norm distance of the line from origin. θ is the angle between the norm and the horizontal x axis. The equation of line in terms of ρ and θ now is
-
-y=−cos(θ)sin(θ)x+ρsin(θ)
+Due to undefined value of slope for vertical lines in cartesian coordinates, we have to move to polar coordinates. In polar coordinates line is define by $\rho$ and $\theta$ where $\rho$ is the norm distance of the line from origin. $\theta$ is the angle between the norm and the horizontal $x$ axis. The equation of line in terms of $\rho$ and $\theta$ now is
+$$
+y=−cos(\theta)sin(\theta)x+\rho sin(\theta)
+$$
 and
 
 ρ=xcos(θ)+ysin(θ)
