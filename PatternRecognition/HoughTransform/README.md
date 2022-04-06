@@ -25,16 +25,20 @@ More points that on same line tends to more lines in Hough domain and that will 
 ### Alternative Parameter Space (Polar Coordinates)
 Due to undefined value of slope for vertical lines in cartesian coordinates, we have to move to polar coordinates. In polar coordinates line is define by $\rho$ and $\theta$ where $\rho$ is the norm distance of the line from origin. $\theta$ is the angle between the norm and the horizontal $x$ axis. The equation of line in terms of $\rho$ and $\theta$ now is
 $$
-y=−cos(\theta)sin(\theta)x+\rho sin(\theta)
+y=−\cos(\theta)\sin(\theta)x+\rho \sin(\theta)
 $$
 and
 
-ρ=xcos(θ)+ysin(θ)
+$$
+\rho=x \cos(\theta)+y \sin(\theta)
+$$
 
 ![Polar Coordinates](figs/hough_deriving-rho.png "Hough Parameter Space")
 
-The Range of values of ρ and θ
-θ in polar coordinate takes value in range of -90 to 90
-The maximum norm distance is given by diagonal distance which is
-ρmax=x2+y2−−−−−−√
-So ρ has values in range from −ρmax to ρmax
+The Range of values of $\rho$ and $\theta$:
+* $\theta$ in polar coordinate takes value in range of -90 to 90
+* The maximum norm distance is given by diagonal distance which is
+$$
+\rho_{max}=\sqrt{x^2+y^2}
+$$
+So $\rho$ has values in range from $−\rho_{max}$ to $\rho_{max}$
