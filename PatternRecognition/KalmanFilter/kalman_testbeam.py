@@ -18,6 +18,9 @@ from numpy.linalg import inv
 # A Tutorial of Kalman Filter for a testbeam experiment or fixed target experiment
 # =================
 # Modified from the code by the original author:  Peter Hansen, [link](https://indico.nbi.ku.dk/event/454/contributions/2087)
+# Useful references:
+# * [Track Reconstruction,  Peter Hansen Oct 2018 Tracking Lectures](https://indico.nbi.ku.dk/event/1090/sessions/2365/attachments/2696/3926/trackalgs2018.pdf)
+# * [Straight line track reconstruction for the ATLAS IBL testbeam with the EUDET telescope](https://cds.cern.ch/record/1708349)
 # 
 # Demonstrate track fit method for a simple example of horizontal tracks
 # passing 4 or 6 pixel tracking planes along x, each measuring coordinates (y,z).
@@ -29,10 +32,16 @@ from numpy.linalg import inv
 # dy/dx = 0 at the first plane.
 
 # here are the planes for a choice of 4 planes with distBetweenPlanes=10.:
+#
 #  I             I    magnet   I             I
+#
 # 0cm--------- 10cm-----------20cm----------30cm---------->x-axis
+#
+# ![Detector setup](figs/spectrometer.png "Detector geometry")
 
-# RUN CONFIGURATION
+# Global settings and variables
+# =================
+## RUN CONFIGURATION
 # =================
 
 rdm = R.TRandom3()
@@ -43,7 +52,7 @@ Cut2=          8.        # cut on chisquared for next hits
 Cut3= (4.*numberOfPlanes-5.)*2.5 # cut on total chisquared
 beamMomentum=    0.05    # GeV
 
-# SPECTROMETER DESCRIPTION
+## SPECTROMETER DESCRIPTION
 # =================
 spectrometerLength=30.   #(cm)
 distBetweenPlanes= spectrometerLength/(2.*numberOfPlanes-1.)
@@ -78,7 +87,7 @@ xHits=(2*numberOfPlanes)*[0.]    # Distances (x) from first plane
 ySize=(2*numberOfPlanes)*[0.]         # Half height of chip
 zSize=(2*numberOfPlanes)*[0.]         # Half width of chip
 
-# RECONSTRUCTION DATA
+## RECONSTRUCTION DATA
 # =================
 yHits=(2*numberOfPlanes)*[[]]  # Measurement coordinates (y) of hits
 zHits=(2*numberOfPlanes)*[[]]  # Measurement coordinates (z) of hits
@@ -128,7 +137,8 @@ h16 = R.TH1F("h16"," z chisquared at plane 5",80,0.,24.)
 
 # Event simulation
 # =================
-
+## Generate hits in detector planes
+#
 # propagate from one plane to the next in a field free region (a simple straight line)
 def propagateStraight(firstplane, nextY, nextZ, nextdYdX, nextdZdX):
   
@@ -207,7 +217,9 @@ def propagateStraight(firstplane, nextY, nextZ, nextdYdX, nextdZdX):
 
   return [nextY, nextZ, nextdYdX, nextdZdX]
  
-# Simulate the event
+## Simulate the whole track 
+#
+# (straight tracks hiting plans before the magnet, then through the magnent, then straight tracks through the plans after the magnet)
 def propagateTrack():
 
   # start at plane 0
@@ -236,6 +248,8 @@ def propagateTrack():
   
 # Kalman Filter
 # =================
+
+## Predict and Update (in a local plane)
 
 def kalmanFilter(p1, ihit, z, C):
   # Propagates a track candidate from detector plane p1-1 to detector plane p1
@@ -305,6 +319,7 @@ def kalmanFilter(p1, ihit, z, C):
   chi2=r*r/R
   return [chi2, z, C]
 
+## Global Chi2 (the whole track)
 
 def globalChi2(ihits, x, C):
   #global chi2-fit to x-y hits in 2*numberOfPlanes pixel planes 
@@ -392,7 +407,7 @@ def globalChi2(ihits, x, C):
   return [Chi2[0][0], x, C]
 
 
-#Reconstruct one track in 4 planes
+# Reconstruct one track in 4 planes
 # =================
 def reco4(ibest, xbest, Cbest):
 
@@ -411,6 +426,7 @@ def reco4(ibest, xbest, Cbest):
 
       s2=resolution*resolution
       allsignal= allsignal and (not isNoise[1][i1])
+      # Use hits in the first two planes as the track seed
       #consider the xz plane - a non-bending plane
       #track state at plane 1
       z = np.zeros(shape=(2,1))
@@ -428,6 +444,7 @@ def reco4(ibest, xbest, Cbest):
       #===========================================================
       for i2 in range(len(yHits[2])):
 
+        # Kalman Filter to extend the track to the 3rd plane
         [chi2, z, Cz] = kalmanFilter(2,i2,z,Cz)
 
         allsignal=allsignal and (not isNoise[2][i2])
@@ -440,6 +457,7 @@ def reco4(ibest, xbest, Cbest):
         #====================================================================================
         for i3 in range(len(yHits[3])):
 
+          # Kalman Filter to extend the track to the 4th plane
           [chi2, z, Cz] = kalmanFilter(3,i3,z,Cz)
 
           allsignal=allsignal and (not isNoise[3][i3])
@@ -467,7 +485,7 @@ def reco4(ibest, xbest, Cbest):
             chi2min=chi2
   return [chi2min, xbest, Cbest]
 
-#Store track.
+# Store tracks
 # =================
 def storeTrack(ibest, xbest, Cbest):
   #
@@ -534,6 +552,7 @@ for i in range(numberOfEvents):
 
   # New event
   if (debug): print(" new event " )
+
   # reset input and output data buffers
   for j in range(15): tracks[j]=[]
   for j in range(2*numberOfPlanes):
