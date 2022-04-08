@@ -10,8 +10,10 @@
 ## \author Lailin XU
 
 import os
-from math import fabs, tan, atan
+from math import sqrt, fabs, tan, atan
 import ROOT as R
+import numpy as np
+from numpy.linalg import inv
 
 # A Tutorial of Kalman Filter for a testbeam experiment or fixed target experiment
 # =================
@@ -34,7 +36,7 @@ import ROOT as R
 # =================
 
 rdm = R.TRandom3()
-numberOfEvents=5000        #number of events to be simulated 
+numberOfEvents=1        #number of events to be simulated 
 numberOfPlanes=   2        #number of tracking planes on each side of magnet
 Cut1=          8.        # cut on chisquared for first 3 hits
 Cut2=          8.        # cut on chisquared for next hits
@@ -46,7 +48,7 @@ beamMomentum=    0.05    # GeV
 spectrometerLength=30.   #(cm)
 distBetweenPlanes= spectrometerLength/(2.*numberOfPlanes-1.)
 pixelSize=  0.002       # (cm)
-resolution=  0.0006     #measurement resolution (cm)
+resolution=  float(0.0006)     #measurement resolution (cm)
 tailAmplitude=   0.1     #probability of badly measured hit
 tailWidth=   0.0018      #resolution of badly measured hit (cm)
 
@@ -249,83 +251,56 @@ def kalmanFilter(p1, ihit, z, C):
   #average multiple scattering angle
   t0=multScattAngle*pinv 
   #propagator F to next plane
-  Fz = R.TMatrixD(2,2)
-  FTz = R.TMatrixD(2,2)
-  R.TMatrixDRow(Fz, 0)[0]=1
-  R.TMatrixDRow(Fz, 0)[1]=distBetweenPlanes
-  R.TMatrixDRow(Fz, 1)[0]=0
-  R.TMatrixDRow(Fz, 1)[1]=0
+  Fz = np.zeros(shape=(2,2))
+  FTz = np.zeros(shape=(2,2))
+  Fz[0][0]=1
+  Fz[0][1]=distBetweenPlanes
+  Fz[1][0]=0
+  Fz[1][1]=0
 
   #the transpose of F
-  FTz=Fz.T()  
-  Fz.T()
+  FTz=np.transpose(Fz)
 
   #multiple scattering contribution to covariance of extrapolation
-  Qz = R.TMatrixD(2,2)
+  Qz = np.zeros(shape=(2,2))
 
-  R.TMatrixDRow(Qz, 0)[0]=t0*t0*distBetweenPlanes*distBetweenPlanes
-  R.TMatrixDRow(Qz, 0)[1]=t0*t0*distBetweenPlanes
-  R.TMatrixDRow(Qz, 1)[0]=t0*t0*distBetweenPlanes
-  R.TMatrixDRow(Qz, 1)[1]=t0*t0
+  Qz[0][0]=t0*t0*distBetweenPlanes*distBetweenPlanes
+  Qz[0][1]=t0*t0*distBetweenPlanes
+  Qz[1][0]=t0*t0*distBetweenPlanes
+  Qz[1][1]=t0*t0
 
   #covariance of extrapolation
-  Cpz = R.TMatrixD(Fz)
-  print("Fz")
-  Fz.Print()
-  print("C")
-  C.Print()
-  FTz.Print()
-  print("Qz")
-  Qz.Print()
-  print("Cpz")
-  Cpz.Print()
   #Cpz = Fz*C*FTz+Qz
-  # a workaround
-  Cpz*=C
-  Cpz*=FTz
-  Cpz+=Qz 
-  print("Cpz new")
-  Cpz.Print()
+  Cpz = np.dot(np.dot(Fz, C), FTz)+Qz
 
   #predicted state at next plane
-  zpred = R.TMatrixD(Fz)
-  zpred *=z
-  print("zpred:")
-  zpred.Print()
-  print("z")
-  z.Print()
+  zpred = np.zeros(shape=(2,1))
+  #zpred = Fz*z
+  zpred = np.dot(Fz, z)
 
   #covariance matrix of updated state 
-  Cinv = R.TMatrixD(2,2)
-  Minv = R.TMatrixD(2,2)
-  Minv.Zero()
-  R.TMatrixDRow(Minv, 0)[0]=1./s2
+  # covariance of the prediction
+  Cinv = np.zeros(shape=(2,2))
+  # covariance of the measurement
+  Minv = np.zeros(shape=(2,2))
+  Minv[0][0]=1./s2
   #add weights
-  #Cinv = Cpz.Invert() + Minv 
-  Cinv = R.TMatrixD(Cpz.Invert())
-  Cinv += Minv
-  C=Cinv.Invert()
+  Cinv = inv(Cpz) + Minv 
+  C=inv(Cinv)
 
-  #updated track state
-  znew = R.TMatrixD(2,1)
+  #updated track state, use the weighted average of the measurement and the prediction.
+  # Note that An equivalent way is to use the Kalman gain matrix K
+  znew = np.zeros(shape=(2,1))
   #new z weighted by 1/s2
-  R.TMatrixDRow(znew, 0)[0] = zHits[p1][ihit]/s2
-  R.TMatrixDRow(znew, 1)[0]=0.
+  znew[0][0] = zHits[p1][ihit]/s2
+  znew[1][0]=0.
   #add predicted z - remember Cpz is inverted
   #z=C*(Cpz*zpred + znew)   
-  Ctmp = R.TMatrixD(Cpz)
-  Ctmp *= zpred
-  Ctmp.Print()
-  znew.Print()
-  print("OK 0")
-  Ctmp += znew
-  ztmp = R.TMatrixD(C)
-  ztmp *= Ctmp 
-  z = R.TMatrixD(ztmp)
-  Cpz.Invert()
+  z=np.dot(C, (np.dot(Cpz, zpred) + znew))   
 
   #the residual and the chisquared (the returned float)
   r =(zHits[p1][ihit]-zpred[0][0])
+  #covariance matrix of the residual
   R = s2 + Cpz[0][0]
   chi2=r*r/R
   return [chi2, z, C]
@@ -350,27 +325,26 @@ def globalChi2(ihits, x, C):
   #
   # The column vector of the measurements
   # - first the nplane z measurements, then the nplane y measurements 
-  m = R.TMatrixD(ndim, 1)
+  m = np.zeros(shape=(ndim,1))
   for i in range(nplane):
-    R.TMatrixDRow(m, i)[0] = zHits[i][ihits[i]]
-    R.TMatrixDRow(m, i+nplane)[0] = yHits[i][ihits[i]]
+    m[i][0] = zHits[i][ihits[i]]
+    m[i+nplane][0] = yHits[i][ihits[i]]
 
   #
   # The Covariance matrix of the measurements, including MS induced correlations
-  V = R.TMatrixD(ndim,ndim)
+  V = np.zeros(shape=(ndim,ndim))
 
-  V.Zero()
-  R.TMatrixDRow(V, 0)[0] = s2
-  R.TMatrixDRow(V, nplane)[nplane] = s2
+  V[0][0] = s2
+  V[nplane][nplane] = s2
 
-  for i in range(nplane):
+  for i in range(1, nplane):
     for j in range(i, nplane):
-       R.TMatrixDRow(V, i)[j] = R.TMatrixDRow(V, i-1)[j-1] + i*j*t2*d2
-       R.TMatrixDRow(V, i+nplane)[j+nplane] = R.TMatrixDRow(V, i)[j]
+       V[i][j] = V[i-1][j-1] + i*j*t2*d2
+       V[i+nplane][j+nplane] = V[i][j]
 
        if(j>i):
-         R.TMatrixDRow(V, j)[i] = R.TMatrixDRow(V, i)[j]
-         R.TMatrixDRow(V, j+nplane)[i+nplane] = R.TMatrixDRow(V, j)[i]
+         V[j][i] = V[i][j]
+         V[j+nplane][i+nplane] = V[j][i]
 
   #
   # The track state vector is defined as
@@ -378,39 +352,44 @@ def globalChi2(ihits, x, C):
   # track impact z0, y0 and slopes z'=dz/dx and y'=dy/dx all given at plane 0
   #
   # H projects the track state vector on the measurement base
-  H = R.TMatrixD(ndim,nparameters)
+  H = np.zeros(shape=(ndim,nparameters))
 
-  H.Zero()
   for i in range(nplane):
     j=i+nplane
-    R.TMatrixDRow(H, i)[0]=1
-    R.TMatrixDRow(H, j)[2]=1
-    R.TMatrixDRow(H, i)[1]=i*distBetweenPlanes
-    R.TMatrixDRow(H, j)[3]=i*distBetweenPlanes
+    H[i][0]=1
+    H[j][2]=1
+    H[i][1]=i*distBetweenPlanes
+    H[j][3]=i*distBetweenPlanes
 
-    if(i>numberOfPlanes-1 and nparameters>4): R.TMatrixDRow(H, j)[4]=dpdt*distBetweenPlanes*(0.5+i-numberOfPlanes)
+    if(i>numberOfPlanes-1 and nparameters>4): H[j][4]=dpdt*distBetweenPlanes*(0.5+i-numberOfPlanes)
   
-  HT=H.T()
-  H.T()
+  HT=np.transpose(H)
   #
   # Now do the linear chi2 fit
-  C=HT*V.Invert()*H
-  C.Invert()
+  print("Test 0, HT:", HT)
+  print("Test 1, V:", V) 
+  print("Test 2, H:", H) 
+  #Ctmp=HT*inv(V)*H
+  Ctmp=np.dot(np.dot(HT, inv(V)), H)
+  print("Test 3, Ctmp:", Ctmp)
+  C=inv(Ctmp)
   # V is now inverse
   # C is now the covariance matrix of the fitted track state
 
   # x is the fitted track state vector
-  x = C*HT*V*m
+  #x = C*HT*V*m
+  x = np.dot(np.dot(C, HT), np.dot(V, m))
 
   # R is the residual vector
-  R=m-H*x
-  RT=R.T()
-  R.T()
+  #R=m-H*x
+  R=m-np.dot(H, x)
+  RT=np.transpose(R)
  
-  Chi2=RT*V*R
-  if(debug): print("  chi2 ", R.TMatrixDRow(Chi2, 0)[0])
+  #Chi2=RT*V*R
+  Chi2=np.dot(np.dot(RT, V), R)
+  if(debug): print("  chi2 ", Chi2[0][0])
   # Return chi2 for ndim-nparameters d.o.f.
-  return [R.TMatrixDRow(Chi2, 0)[0], x, C]
+  return [Chi2[0][0], x, C]
 
 
 #Reconstruct one track in 4 planes
@@ -434,15 +413,15 @@ def reco4(ibest, xbest, Cbest):
       allsignal= allsignal and (not isNoise[1][i1])
       #consider the xz plane - a non-bending plane
       #track state at plane 1
-      z = R.TMatrixD(2, 1)
-      R.TMatrixDRow(z, 0)[0] = zHits[1][i1]
-      R.TMatrixDRow(z, 1)[0] = (zHits[1][i1]-zHits[0][i0])/distBetweenPlanes
+      z = np.zeros(shape=(2,1))
+      z[0][0] = zHits[1][i1]
+      z[1][0] = (zHits[1][i1]-zHits[0][i0])/distBetweenPlanes
       #its covariance
-      Cz = R.TMatrixD(2, 2)
-      R.TMatrixDRow(Cz, 0)[0] = s2
-      R.TMatrixDRow(Cz, 0)[1] = s2/distBetweenPlanes
-      R.TMatrixDRow(Cz, 1)[0] = R.TMatrixDRow(Cz, 0)[1]
-      R.TMatrixDRow(Cz, 1)[1] = 2*s2/distBetweenPlanes/distBetweenPlanes
+      Cz = np.zeros(shape=(2,2))
+      Cz[0][0] = s2
+      Cz[0][1] = s2/distBetweenPlanes
+      Cz[1][0] = Cz[0][1]
+      Cz[1][1] = 2*s2/distBetweenPlanes/distBetweenPlanes
 
 
       # loop over hits in the third plane
@@ -472,9 +451,9 @@ def reco4(ibest, xbest, Cbest):
 
           # make a global chi2 fit and store only the best track
           # ===============================================================================
-          x = R.TMatrixD(5, 1)
-          C = R.TMatrixD(5, 5)
-          R.TMatrixDRow(x, 4)[0] = 1./beamMomentum #use here a fixed momentum estimate
+          x = np.zeros(shape=(5,1))
+          C = np.zeros(shape=(5,5))
+          x[4][0] = 1./beamMomentum #use here a fixed momentum estimate
           ihits=[i0,i1,i2,i3]
           [chi2, x, C] = globalChi2(ihits,x,C)
 
@@ -483,10 +462,10 @@ def reco4(ibest, xbest, Cbest):
             ibest[1]=i1
             ibest[2]=i2
             ibest[3]=i3
-            xbest=R.TMatrixD(x)
-            Cbest=R.TMatrixD(C)
+            xbest=x
+            Cbest=C
             chi2min=chi2
-  return chi2min
+  return [chi2min, xbest, Cbest]
 
 #Store track.
 # =================
@@ -595,9 +574,9 @@ for i in range(numberOfEvents):
 
   # number of accepted track candidates.
   ntracks=0           
-  xbest=R.TMatrixD(5,1)
-  Cbest=R.TMatrixD(5,5)
-  ibest=(2*numberOfPlanes)*[]
+  xbest=np.zeros(shape=(5,1))
+  Cbest=np.zeros(shape=(5,5))
+  ibest=(2*numberOfPlanes)*[0.]
 
   #Consider all possible combinations of hits to find best combination in xz
   #Only one track is reconstructed and it must have hits in all planes
@@ -606,7 +585,7 @@ for i in range(numberOfEvents):
     #chi2min=reco6(ibest,xbest,Cbest)
     continue
   else:
-    chi2min=reco4(ibest,xbest,Cbest)
+    [chi2min, xbest, Cbest]=reco4(ibest,xbest,Cbest)
 
   # Reject event if best track not good enough
   if(chi2min>Cut3):
@@ -618,7 +597,7 @@ for i in range(numberOfEvents):
   h13.Fill(chi2min)
 
   # Repeat the fit for the selected track (using the measured momentum now)
-  chi2= globalChi2(ibest,xbest,Cbest)
+  [chi2, dummp_x, dummy_C]= globalChi2(ibest,xbest,Cbest)
   h14.Fill(chi2)
 
   allsignal= True
@@ -631,11 +610,11 @@ for i in range(numberOfEvents):
       print(" Noisy track selected   chi2 " , chi2 )
 
   #Store the track
-  p = 5*[]
-  ep = (5*5)*[]
+  p = 5*[0.]
+  ep = (5*5)*[0.]
   for ipar in range(5):
-    p[ipar]=R.TMatrixDRow(xbest, ipar)[0]
-    for jpar in range(5): ep[ipar*5+jpar]=R.TMatrixDRow(Cbest, ipar)[jpar]
+    p[ipar]=xbest[ipar][0]
+    for jpar in range(5): ep[ipar*5+jpar]=Cbest[ipar][jpar]
 
   storeTrack(ibest,p,ep)
 
