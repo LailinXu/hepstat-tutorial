@@ -1,3 +1,16 @@
+## \file
+## \ingroup tutorial_kalmanFilter
+## \notebook
+## Kalman Filter
+##
+## \macro_image
+## \macro_output
+## \macro_code
+##
+## \author Lailin XU
+
+import os
+from math import fabs, tan, atan
 import ROOT as R
 
 # A Tutorial of Kalman Filter for a testbeam experiment or fixed target experiment
@@ -227,6 +240,8 @@ def kalmanFilter(p1, ihit, z, C):
   # as a straight line in x-z (the non-bending plane)
   # updates the track parameters and their error matrix in x-z
   # returns the chisquared at detector plane p1 for hit number ihit in this plane
+
+  import ROOT as R
  
   s2=resolution*resolution
   #use here a fixed momentum estimate
@@ -254,12 +269,31 @@ def kalmanFilter(p1, ihit, z, C):
   R.TMatrixDRow(Qz, 1)[1]=t0*t0
 
   #covariance of extrapolation
-  Cpz = R.TMatrixD(2,2)
-  Cpz = Fz*C*FTz+Qz
+  Cpz = R.TMatrixD(Fz)
+  print("Fz")
+  Fz.Print()
+  print("C")
+  C.Print()
+  FTz.Print()
+  print("Qz")
+  Qz.Print()
+  print("Cpz")
+  Cpz.Print()
+  #Cpz = Fz*C*FTz+Qz
+  # a workaround
+  Cpz*=C
+  Cpz*=FTz
+  Cpz+=Qz 
+  print("Cpz new")
+  Cpz.Print()
 
   #predicted state at next plane
-  zpred = R.TMatrixD(2,1)
-  zpred = Fz*z
+  zpred = R.TMatrixD(Fz)
+  zpred *=z
+  print("zpred:")
+  zpred.Print()
+  print("z")
+  z.Print()
 
   #covariance matrix of updated state 
   Cinv = R.TMatrixD(2,2)
@@ -267,20 +301,31 @@ def kalmanFilter(p1, ihit, z, C):
   Minv.Zero()
   R.TMatrixDRow(Minv, 0)[0]=1./s2
   #add weights
-  Cinv = Cpz.Invert() + Minv 
+  #Cinv = Cpz.Invert() + Minv 
+  Cinv = R.TMatrixD(Cpz.Invert())
+  Cinv += Minv
   C=Cinv.Invert()
 
   #updated track state
   znew = R.TMatrixD(2,1)
   #new z weighted by 1/s2
-  R.TMatrixDRow(znew, 0)[0] = zHits[p1].at(ihit)/s2
+  R.TMatrixDRow(znew, 0)[0] = zHits[p1][ihit]/s2
   R.TMatrixDRow(znew, 1)[0]=0.
   #add predicted z - remember Cpz is inverted
-  z=C*(Cpz*zpred + znew)   
+  #z=C*(Cpz*zpred + znew)   
+  Ctmp = R.TMatrixD(Cpz)
+  Ctmp *= zpred
+  Ctmp.Print()
+  znew.Print()
+  print("OK 0")
+  Ctmp += znew
+  ztmp = R.TMatrixD(C)
+  ztmp *= Ctmp 
+  z = R.TMatrixD(ztmp)
   Cpz.Invert()
 
   #the residual and the chisquared (the returned float)
-  r =(zHits[p1].at(ihit)-zpred[0][0])
+  r =(zHits[p1][ihit]-zpred[0][0])
   R = s2 + Cpz[0][0]
   chi2=r*r/R
   return [chi2, z, C]
@@ -511,11 +556,11 @@ for i in range(numberOfEvents):
   # New event
   if (debug): print(" new event " )
   # reset input and output data buffers
-  for j in range(15): tracks[j].clear()
+  for j in range(15): tracks[j]=[]
   for j in range(2*numberOfPlanes):
-    yHits[j].clear()
-    zHits[j].clear()
-    isNoise[j].clear()
+    yHits[j]=[]
+    zHits[j]=[]
+    isNoise[j]=[]
   
   #========================================================================================
   # Simulate the event
@@ -619,8 +664,8 @@ print(" Hits per track is always " , 2*numberOfPlanes )
 #      the pulls ( (fit parameter - truth)/ parameter error )
 #      and the chisquared (hit-fit)^2/hit error^2.
 
-gStyle.SetOptFit(1011)
-gStyle.SetErrorX(0)
+R.gStyle.SetOptFit(1011)
+R.gStyle.SetErrorX(0)
 
 
 """
