@@ -118,9 +118,6 @@ numberOfRejectedTracks=0
 numberOfGoodRejectedTracks=0
 
 # Book histograms
-fout1 = R.TFile("events.root", "RECREATE")
-tr_evt = R.TTree("event")
-
 fout2 = R.TFile("kf_result.root", "RECREATE")
 h1 = R.TH1F("h1","y0 residuals",100,-.005,.005)
 h2 = R.TH1F("h2","z0 residuals",100,-.005,.005)
@@ -321,7 +318,7 @@ def kalmanFilter(p1, ihit, z, C):
   #covariance matrix of the residual
   R = s2 + Cpz[0][0]
   chi2=r*r/R
-  return [chi2, z, C]
+  return [chi2, zpred, z, C]
 
 ## Global Chi2 (the whole track)
 
@@ -413,9 +410,118 @@ def globalChi2(ihits, x, C):
 
 # Reconstruct one track in 4 planes
 # =================
+
+## Plotting
+# Draw hits in the x-z plane
+ch = R.TCanvas("chits","Hits",50,50,800,600)
+ch.GetFrame().SetFillColor(0)
+ch.GetFrame().SetBorderSize(20)
+
+gr_xz_sig = None
+gr_xz_noise = None
+list_gr_trks=[]
+
+def drawHits(evtIndex):
+  
+  global gr_xz_sig, gr_xz_noise
+  nhitsAll, nhitsSig, nhitsNoise=0, 0, 0
+  for j in range(2*numberOfPlanes):
+    nHits=len(yHits[j])
+    nhitsAll += nHits
+    for k in range(nHits):
+      if(isNoise[j][k]): nhitsNoise+=1
+
+  nhitsSig = nhitsAll - nhitsNoise
+  # Signal hits
+  gr_xz_sig = R.TGraph(nhitsSig)
+  gr_xz_sig.SetMarkerStyle(20)
+  # Noise hits
+  gr_xz_noise = R.TGraph(nhitsNoise)
+  gr_xz_noise.SetMarkerStyle(24)
+
+  # Loop all hits
+  isig, inoise=0, 0
+  for j in range(2*numberOfPlanes):
+    nHits=len(yHits[j])
+    for k in range(nHits):
+      if(isNoise[j][k]):
+        gr_xz_noise.SetPoint(inoise, xHits[j], zHits[j][k])
+        inoise+=1
+      else:  
+        gr_xz_sig.SetPoint(isig, xHits[j], zHits[j][k])
+        isig+=1
+
+  ch.cd()
+  htmp=ch.DrawFrame(-5, -1, 45, 1.2)
+  htmp.GetXaxis().SetTitle("X [cm]")
+  htmp.GetYaxis().SetTitle("Z [cm]")
+  gr_xz_sig.Draw("P") 
+  gr_xz_noise.Draw("Psame") 
+
+  ch.Draw()
+  leg = R.TLegend(0.6, 0.7, 0.9, 0.9)
+  leg.SetFillColor(R.kWhite)
+  leg.SetBorderSize(0)
+  leg.SetTextSize(0.040)
+  leg.AddEntry(gr_xz_sig, "Signal hits", "p")
+  leg.AddEntry(gr_xz_noise, "Noise hits", "p")
+  leg.Draw()
+
+  fout2.cd()
+  ch.Write("event_"+str(i))
+ 
+# Draw hits of the track candidate found by the Kalman Filter
+def showKFposterior(evtIndex, zHitsKF, zHitsKFpred, totchi2_KF, itrk):
+
+  nhits = 2*numberOfPlanes
+  gr_kf = R.TGraph(nhits)
+  gr_kf_pred = R.TGraph(nhits)
+  ic = R.kMagenta + itrk
+  gr_kf.SetMarkerColor(ic)
+  gr_kf.SetLineColor(ic)
+  gr_kf.SetMarkerStyle(29)
+  gr_kf_pred.SetMarkerColor(ic)
+  gr_kf_pred.SetLineColor(ic)
+  gr_kf_pred.SetMarkerStyle(34)
+
+  # Loop all hits
+  ih=0
+  for j in range(2*numberOfPlanes):
+    gr_kf.SetPoint(ih, xHits[j], zHitsKF[j])
+    gr_kf_pred.SetPoint(ih, xHits[j], zHitsKFpred[j])
+    ih+=1
+
+  print(ch.GetListOfPrimitives())
+  ch.cd()
+  gr_kf.Draw("Pcsame") 
+  gr_kf_pred.Draw("Pcsame") 
+
+  leg = R.TLegend(0.6, 0.7, 0.9, 0.9)
+  leg.SetFillColor(R.kWhite)
+  leg.SetBorderSize(0)
+  leg.SetTextSize(0.040)
+  leg.AddEntry(gr_xz_sig, "Signal hits", "p")
+  leg.AddEntry(gr_xz_noise, "Noise hits", "p")
+  leg.AddEntry(gr_kf_pred, "Predicted hits (Kalman)", "pl")
+  leg.AddEntry(gr_kf, "Updated hits (Kalman)", "pl")
+  leg.Draw()
+
+  tl=R.TPaveText(0.6, 0.6, 0.9, 0.7, "NDC")
+  tl.SetFillColor(R.kWhite)
+  tl.SetBorderSize(0)
+  tl.SetTextSize(0.04)
+  tl.AddText("#chi^2 (Kalman)= {:.3e}".format(totchi2_KF))
+  tl.Draw()
+
+  fout2.cd()
+  ch.Write("event_"+str(i)+"_trk_"+str(itrk))
+
+## Reconstruction (track finding with the Kalman Filter, then Track Fitting)
+
 def reco4(ibest, xbest, Cbest):
 
   chi2min=10000000.
+  itrk = 0 # counter
   # First loop over the hits in the first plane
   # =======================================================================
   for i0 in range(len(yHits[0])):
@@ -434,6 +540,7 @@ def reco4(ibest, xbest, Cbest):
       #consider the xz plane - a non-bending plane
       #track state at plane 1
       z = np.zeros(shape=(2,1))
+      zpred = np.zeros(shape=(2,1))
       z[0][0] = zHits[1][i1]
       z[1][0] = (zHits[1][i1]-zHits[0][i0])/distBetweenPlanes
       #its covariance
@@ -443,33 +550,45 @@ def reco4(ibest, xbest, Cbest):
       Cz[1][0] = Cz[0][1]
       Cz[1][1] = 2*s2/distBetweenPlanes/distBetweenPlanes
 
-
+      # total chi2 of the track found by the Kalman Filter
+      totchi2_KF = 0
+  
       # loop over hits in the third plane
       #===========================================================
       for i2 in range(len(yHits[2])):
 
         # Kalman Filter to extend the track to the 3rd plane
-        [chi2, z, Cz] = kalmanFilter(2,i2,z,Cz)
+        [chi2, zpred, z, Cz] = kalmanFilter(2,i2,z,Cz)
 
         allsignal=allsignal and (not isNoise[2][i2])
         if(allsignal): h11.Fill(chi2)
 
         if(chi2 > Cut1): continue
-
-
+        z2 = z
+        z2pred = zpred
+        totchi2_KF += chi2
+   
         #loop over hits in the fourth plane
         #====================================================================================
         for i3 in range(len(yHits[3])):
 
           # Kalman Filter to extend the track to the 4th plane
-          [chi2, z, Cz] = kalmanFilter(3,i3,z,Cz)
+          [chi2, zpred, z, Cz] = kalmanFilter(3,i3,z,Cz)
 
           allsignal=allsignal and (not isNoise[3][i3])
           if(allsignal): h12.Fill(chi2)
 
           if(chi2 >Cut2): continue
+          z3 = z
+          z3pred = zpred
+          totchi2_KF += chi2
 
           # visualize
+          zHitsKF=[zHits[0][i1], zHits[1][i2], z2[0][0], z3[0][0]]
+          zHitsKFpred=[zHits[0][i1], zHits[1][i2], z2pred[0][0], z3pred[0][0]]
+          print('zHitsKF:', zHitsKF)
+          showKFposterior(i, zHitsKF, zHitsKFpred, totchi2_KF, itrk)
+          itrk += 1
 
           # now we have a track candidate, move to the track fitting part
 
@@ -595,6 +714,9 @@ for i in range(numberOfEvents):
     numberOfInefficientTracks+=1
     continue
 
+  # visualize the hits
+  drawHits(i)
+
   if(debug): print(" start reconstruction" )
 
   # number of accepted track candidates.
@@ -611,6 +733,9 @@ for i in range(numberOfEvents):
     continue
   else:
     [chi2min, xbest, Cbest]=reco4(ibest,xbest,Cbest)
+
+  #fout2.cd()
+  #ch.Write("event_"+str(i))
 
   # Reject event if best track not good enough
   if(chi2min>Cut3):
@@ -649,7 +774,7 @@ for i in range(numberOfEvents):
   if(allsignal): numberOfGoodReconstructedTracks+=1
   for j in range(2*numberOfPlanes):
     if(isNoise[j][ibest[j]]): nNoiseHitsOnTrack+=1
-    #flag the hits as used
+    #flag the hits as used (change the coordinate to out of the detector range)
     yHits[j][ibest[j]]=ySize[j]+1.
 
 #
@@ -799,3 +924,23 @@ c14.GetFrame().SetBorderSize(20)
 h14.GetXaxis().SetTitle(" global chi2 with variable MS error")
 h14.Draw()
 """
+
+fout2.cd()
+h1.Write()
+h1.Write() 
+h2.Write() 
+h3.Write() 
+h4.Write() 
+h5.Write() 
+h6.Write() 
+h7.Write() 
+h8.Write() 
+h9.Write() 
+h10.Write()
+h11.Write()
+h12.Write()
+h13.Write()
+h14.Write()
+h15.Write()
+h16.Write()
+fout2.Close()
