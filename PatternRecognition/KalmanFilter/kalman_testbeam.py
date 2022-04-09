@@ -118,6 +118,10 @@ numberOfRejectedTracks=0
 numberOfGoodRejectedTracks=0
 
 # Book histograms
+fout1 = R.TFile("events.root", "RECREATE")
+tr_evt = R.TTree("event")
+
+fout2 = R.TFile("kf_result.root", "RECREATE")
 h1 = R.TH1F("h1","y0 residuals",100,-.005,.005)
 h2 = R.TH1F("h2","z0 residuals",100,-.005,.005)
 h3 = R.TH1F("h3","ty residuals",100,-.025,.025)
@@ -381,12 +385,12 @@ def globalChi2(ihits, x, C):
   HT=np.transpose(H)
   #
   # Now do the linear chi2 fit
-  print("Test 0, HT:", HT)
-  print("Test 1, V:", V) 
-  print("Test 2, H:", H) 
+  # chi2 = (m - H*x)^T V^-1 (m - H*x)
+  # In linear case, the solution is x_fit = (H^T V^-1 H)^-1 H^T V^-1 m
+  # see p54 of the [slides by Peter Hansen](https://indico.nbi.ku.dk/event/1090/sessions/2365/attachments/2696/3926/trackalgs2018.pdf)
+  #
   #Ctmp=HT*inv(V)*H
   Ctmp=np.dot(np.dot(HT, inv(V)), H)
-  print("Test 3, Ctmp:", Ctmp)
   C=inv(Ctmp)
   # V is now inverse
   # C is now the covariance matrix of the fitted track state
@@ -465,7 +469,9 @@ def reco4(ibest, xbest, Cbest):
 
           if(chi2 >Cut2): continue
 
-          # now we have a track candidate
+          # visualize
+
+          # now we have a track candidate, move to the track fitting part
 
           # make a global chi2 fit and store only the best track
           # ===============================================================================
