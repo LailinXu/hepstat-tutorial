@@ -71,7 +71,7 @@ thetaxz=        0.0     # incident track angle in the xz plane
 # There is an adjustable threshold with which we can get the noise occupancy
 # as low is 10^-7, at a cost in the hit efficiency
 
-noiseOccupancy=  0.00001  # noise probability in readout time window
+noiseOccupancy=  0.000005  # noise probability in readout time window
 hitEfficiency =  0.97    # probability for a track to make a hit
                                         #  assume: noise=0.000001 eff=0.93
                                         #                0.00001  eff=0.97
@@ -412,6 +412,7 @@ def globalChi2(ihits, x, C):
 # =================
 
 ## Plotting
+#
 # Draw hits in the x-z plane
 ch = R.TCanvas("chits","Hits",50,50,800,600)
 ch.GetFrame().SetFillColor(0)
@@ -458,7 +459,6 @@ def drawHits(evtIndex):
   gr_xz_sig.Draw("P") 
   gr_xz_noise.Draw("Psame") 
 
-  ch.Draw()
   leg = R.TLegend(0.6, 0.7, 0.9, 0.9)
   leg.SetFillColor(R.kWhite)
   leg.SetBorderSize(0)
@@ -466,6 +466,8 @@ def drawHits(evtIndex):
   leg.AddEntry(gr_xz_sig, "Signal hits", "p")
   leg.AddEntry(gr_xz_noise, "Noise hits", "p")
   leg.Draw()
+
+  ch.Draw()
 
   fout2.cd()
   ch.Write("event_"+str(i))
@@ -510,8 +512,10 @@ def showKFposterior(evtIndex, zHitsKF, zHitsKFpred, totchi2_KF, itrk):
   tl.SetFillColor(R.kWhite)
   tl.SetBorderSize(0)
   tl.SetTextSize(0.04)
-  tl.AddText("#chi^2 (Kalman)= {:.3e}".format(totchi2_KF))
+  tl.AddText("#chi^{2} (Kalman)= {:.3e}".format(totchi2_KF))
   tl.Draw()
+
+  ch.Draw()
 
   fout2.cd()
   ch.Write("event_"+str(i)+"_trk_"+str(itrk))
