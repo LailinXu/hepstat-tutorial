@@ -38,6 +38,16 @@ from numpy.linalg import inv
 # 0cm--------- 10cm-----------20cm----------30cm---------->x-axis
 #
 # ![Detector setup](figs/spectrometer.png "Detector geometry")
+#
+# This tutorial has the following parts:
+# * Generate toy events: a particle passes through the 4 detector planes and it would leave 4 true hits. But the following detector effects are considered in the simulation:
+# ** Detector resolution (the measured hit position could be different than the true hit position, a Gaussian smearing is used to emulate this effect)
+# ** Multi-scattering which could deviate the track from a straight line
+# ** Detector efficiency (not 100%, i.e., a true hit might not be seen by the detector)
+# ** Detector noise (apart from the true signal hits, random noise hits are added in each detector plane)
+# * Track finding with the Kalman Filter
+# ** Use hits from the first two planes as a track seed. All combinatorial track seeds are considered, including both true signal hits and noise hits.
+# * Track fitting with a simple chi2 minimization
 
 # Global settings and variables
 # =================
@@ -47,8 +57,8 @@ from numpy.linalg import inv
 rdm = R.TRandom3()
 numberOfEvents=1        #number of events to be simulated 
 numberOfPlanes=   2        #number of tracking planes on each side of magnet
-Cut1=          8.        # cut on chisquared for first 3 hits
-Cut2=          8.        # cut on chisquared for next hits
+Cut1=          100.        # cut on chisquared for first 3 hits
+Cut2=          100.        # cut on chisquared for next hits
 Cut3= (4.*numberOfPlanes-5.)*2.5 # cut on total chisquared
 beamMomentum=    0.05    # GeV
 
@@ -166,6 +176,7 @@ def propagateStraight(firstplane, nextY, nextZ, nextdYdX, nextdZdX):
     nextdZdX+=(r*multScattAngle)           # update angle due to MS
     if(debug): print(" track y z at plane ", j, " ", y, " ", z, " angles " , nextdYdX, " ", nextdZdX)
     
+    # To take into account the detector efficiency
     r=rdm.Uniform()
  
     # If this gives a hit
@@ -250,7 +261,100 @@ def propagateTrack():
 # Kalman Filter
 # =================
 
-## Predict and Update (in a local plane)
+#### Predict and Update (in a local plane)
+# 
+# State vetector a the detector plane $k$ (in the $x-z$ cooridinate system): 
+# $$
+# x_k = \begin{pmatrix}
+# z \\
+# dz/dx
+# \end{pmatrix}
+# $$
+#
+# Propagation from the detector plane $k-1$ to the plane $k$:
+# $$
+# x_k = F_k x_{k-1}
+# $$
+# In our case, the propagation matrix $F_k$ is very simple (and the same for all planes, assuming no magnet)
+# $$
+# F_k = F_z \equiv \begin{pmatrix}
+# 1 & d \\
+# 0 & 1
+# \end{pmatrix}
+# $$
+# So that the propagation is
+# $$
+# x_k = F_k x_{k-1} = \begin{pmatrix}
+# 1 & d \\
+# 0 & 1 
+# \end{pmatrix}
+# \begin{pmatrix}
+# z_{k-1} \\
+# (\frac{dz}{dx})_{k-1}
+# \end{pmatrix}
+# $$
+# where $d$ is the distance between the two planes.
+#
+# To take into account the multi-scattering effect, one can add a noise term $\omega$ to the state vector:
+# $$
+# x_k = F_k x_{k-1} + \omega
+# $$
+# with $E(\omega)=0$ and the covariance matrix
+# $$
+# cov(\omega) = Q_z \equiv \begin{pmatrix}
+# \theta_{MS}^2 d^2  &  \theta_{MS}^2 d \\
+#  \theta_{MS}^2 d   &  \theta_{MS} 
+# \end{pmatrix}
+# $$
+# where $\theta_{MS}$ is the average multi-scattering angle.
+#
+# Project the state vector $x_k$ to get the measurement $m_k$:
+# $$
+# m_k = H x_k + \epsilon
+# $$
+# where $H$ is the projection matrix with a simple form
+# $$
+# H = \begin{pmatrix}
+# 1 & 0 \\
+# 0 & 1 
+# \end{pmatrix}
+# $$
+# and $\epsilon$ is the measurement uncertainty with $E(\epsilon)=0$ and a covariance matrix:
+# $$
+# cov(\epsilon) = \begin{pmatrix}
+# \sigma^2 & 0 \\
+# 0 & 0
+# \end{pmatrix}
+# $$
+# where $\sigma$ is the detector resolution (we can only measure the hit position, not the direction).
+#
+#### Prediction:
+#
+# $$
+# \tilde{x}_{k|k-1} = F_k \tilde{x}_{k-1} \\
+# C_{k|k-1} = F_k^{T} C_{k-1} F_k + Q_k = F_z^T C_{k-1} F_z + Q_z \\
+# $$
+# $$
+# C_{k-1} = \begin{pmatrix}
+# \sigma^2 & \sigma^2/d \\
+# \sigma^2/d & 2\sigma^2/d^2
+# \end{pmatrix}
+# $$
+# 
+#### Update:
+#
+# the weighted average of the measurement and the prediction.
+# $$
+# \tilde{x}_{k|k} = (W_{k|k-1} + W_m)^{-1} ( W_{k|k-1} \tilde{x}_{k|k-1} + W_m x_m) \\
+# x_m = H^T m_k \\
+# $$
+# with weight matrices:
+# $$
+# W_m = cov(\epsilon)^{-1}
+# $$
+# $$
+# W_{k|k-1} = C_{k|k-1}^{-1}
+# $$
 
 def kalmanFilter(p1, ihit, z, C):
   # Propagates a track candidate from detector plane p1-1 to detector plane p1
@@ -470,10 +574,11 @@ def drawHits(evtIndex):
   ch.Draw()
 
   fout2.cd()
+  ch.SaveAs("event_"+str(i)+".png")
   ch.Write("event_"+str(i))
  
 # Draw hits of the track candidate found by the Kalman Filter
-def showKFposterior(evtIndex, zHitsKF, zHitsKFpred, totchi2_KF, itrk):
+def showKFposterior(evtIndex, zHitsKF, zHitsKFpred, totchi2_KF, totchi2_KFfit, itrk):
 
   nhits = 2*numberOfPlanes
   gr_kf = R.TGraph(nhits)
@@ -493,7 +598,6 @@ def showKFposterior(evtIndex, zHitsKF, zHitsKFpred, totchi2_KF, itrk):
     gr_kf_pred.SetPoint(ih, xHits[j], zHitsKFpred[j])
     ih+=1
 
-  print(ch.GetListOfPrimitives())
   ch.cd()
   gr_kf.Draw("Pcsame") 
   gr_kf_pred.Draw("Pcsame") 
@@ -512,12 +616,14 @@ def showKFposterior(evtIndex, zHitsKF, zHitsKFpred, totchi2_KF, itrk):
   tl.SetFillColor(R.kWhite)
   tl.SetBorderSize(0)
   tl.SetTextSize(0.04)
-  tl.AddText("#chi^{2} (Kalman)= {:.3e}".format(totchi2_KF))
+  tl.AddText("#chi^{{2}} (Kalman)= {:.3e}".format(totchi2_KF))
+  tl.AddText("#chi^{{2}} (fit)= {:.3e}".format(totchi2_KFfit))
   tl.Draw()
 
   ch.Draw()
 
   fout2.cd()
+  ch.SaveAs("event_"+str(i)+"_trk_"+str(itrk)+".png")
   ch.Write("event_"+str(i)+"_trk_"+str(itrk))
 
 ## Reconstruction (track finding with the Kalman Filter, then Track Fitting)
@@ -587,13 +693,6 @@ def reco4(ibest, xbest, Cbest):
           z3pred = zpred
           totchi2_KF += chi2
 
-          # visualize
-          zHitsKF=[zHits[0][i1], zHits[1][i2], z2[0][0], z3[0][0]]
-          zHitsKFpred=[zHits[0][i1], zHits[1][i2], z2pred[0][0], z3pred[0][0]]
-          print('zHitsKF:', zHitsKF)
-          showKFposterior(i, zHitsKF, zHitsKFpred, totchi2_KF, itrk)
-          itrk += 1
-
           # now we have a track candidate, move to the track fitting part
 
           # make a global chi2 fit and store only the best track
@@ -612,6 +711,14 @@ def reco4(ibest, xbest, Cbest):
             xbest=x
             Cbest=C
             chi2min=chi2
+
+          # visualize
+          zHitsKF=[zHits[0][i1], zHits[1][i2], z2[0][0], z3[0][0]]
+          zHitsKFpred=[zHits[0][i1], zHits[1][i2], z2pred[0][0], z3pred[0][0]]
+          print('zHitsKF:', zHitsKF)
+          showKFposterior(i, zHitsKF, zHitsKFpred, totchi2_KF, chi2, itrk)
+          itrk += 1
+
   return [chi2min, xbest, Cbest]
 
 # Store tracks
