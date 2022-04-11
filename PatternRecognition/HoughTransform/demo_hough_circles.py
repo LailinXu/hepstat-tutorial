@@ -13,12 +13,16 @@ import matplotlib.pyplot as plt
 import ROOT as R
 from math import fabs
 
+# Hit positions
 xHits=[]
 yHits=[]
 layerId=[]
 # 3 layers of cylindrical pixel detectors, with the following radius (mm)
 detR=[65.115, 115.11, 165.11]
 
+# Read hits from a TTree file
+# 
+# Each event has only one track. For the purpose of this tutorial, one can read more than one track. 
 def readHits(infile, nTrks):
 
   xHits=[]
@@ -46,6 +50,7 @@ def readHits(infile, nTrks):
   
   return [xHits, yHits, layerId]
 
+# Conformal mapping
 def conformal(xHits, yHits):
 
   cxHits, cyHits=[], []
@@ -61,12 +66,14 @@ def conformal(xHits, yHits):
 
   return [cxHits, cyHits]
 
+# Generate randome noise hits
 def addNoise(nNoise):
 
     xNoise, yNoise, lNoise=[], [], []
     for i in range(nNoise):
-      
+      # a random hit in the detector surface 
       theta=np.random.rand()
+      # pick a random detector layer
       layerId=int(np.random.rand()*100%3)
       r = detR[layerId]
       x, y = r * np.cos(theta), r * np.sin(theta)
@@ -77,6 +84,7 @@ def addNoise(nNoise):
 
     return [xNoise, yNoise, lNoise]
 
+# Hough transform
 def houghLine(xHits, yHits):
     ''' Basic Hough line transform that builds the accumulator array
     Input : xHits, yHits are x and y coodinates of all points
@@ -91,11 +99,7 @@ def houghLine(xHits, yHits):
     Ny = len(yHits)
     Nx = len(xHits)
 
-    maxx = max(fabs(max(xHits)), fabs(min(xHits)))
-    maxy = max(fabs(max(yHits)), fabs(min(yHits)))
-    # Max diatance is diagonal one 
-    Maxdist = int(np.round(np.sqrt(maxx**2 + maxy ** 2)))
-    print('Maxdist: ', Maxdist, ' maxx= ', maxx, ' maxy= ', maxy)
+    # Binning
     Maxdist = 100
 
     # Theta in range from -90 to 90 degrees
@@ -133,17 +137,33 @@ def houghLine(xHits, yHits):
     return accumulator, thetas, rs
 
 # Read hits
+# ==========
+#
+# A Ntuple containning hit positions in 3 detector layers. Hits are generated with 100 MeV electrons in the Super Tau-Charm Factory detector.
 infile="posPt100.root"
-nTrks=1
+# Number of tracks to test
+nTrks=2
 [xHits, yHits, layerId] = readHits(infile, nTrks)
 
+# Generate noise hits
+# ==========
+nNoise=2
+[xNoise, yNoise, lNoise] = addNoise(nNoise)
+xHitsSig=list(xHits)
+yHitsSig=list(yHits)
+xHits.extend(xNoise)
+yHits.extend(yNoise)
+layerId.extend(lNoise)
+
 # Plotting
-plt.figure('Hits', figsize=(16,8))
+# ==========
+plt.figure('Hits', figsize=(15,4.5))
 plt.subplot(1,3,1)
 plt.title('Original Hits')
 plt.xlabel("x")
 plt.ylabel("y")
-plt.scatter(xHits, yHits)
+plt.scatter(xHitsSig, yHitsSig, s=40, color='black')
+plt.scatter(xNoise, yNoise, s=40, facecolors='none', edgecolor='black')
 
 plt.xlim((-detR[2]*1.05,detR[2]*1.05))
 plt.ylim((-detR[2]*1.05,detR[2]*1.05))
@@ -163,6 +183,7 @@ plt.gca().add_patch(ly3)
 #plt.show()
 
 # Conformal mapping (translate circles passing through the origin to straight lines)
+# ==========
 [cxHits, cyHits] = conformal(xHits, yHits)
 
 plt.subplot(1,3,2)
@@ -173,6 +194,7 @@ plt.ylabel("Y")
 plt.scatter(cxHits, cyHits)
 
 # Do Hough Transform
+# ==========
 accumulator, thetas, rhos = houghLine(cxHits, cyHits)
 
 plt.subplot(1,3,3)
