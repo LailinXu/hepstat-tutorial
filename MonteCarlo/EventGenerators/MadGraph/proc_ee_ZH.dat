@@ -1,0 +1,30 @@
+#
+############################
+### physics process
+############################
+import model sm
+define p = g u c d s u~ c~ d~ s~
+define j = g u c d s u~ c~ d~ s~
+define l+ = e+ mu+
+define l- = e- mu-
+define vl = ve vm vt
+define vl~ = ve~ vm~ vt~
+#generate e- e+ > h > l+ l- b b~
+generate e- e+ > z h
+output test_eeZH2
+launch
+############################
+## hadronization, shower
+############################
+shower=Pythia8
+# change run_card
+set ebeam1 120
+set ebeam2 120
+set lpp1 +3
+set lpp2 -3
+set pdlabel cepc240ll
+set nevents 1000
+set seed 0
+set fixed_ren_scale F
+set fixed_fac_scale F
+## for shower
