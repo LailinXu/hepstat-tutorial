@@ -268,12 +268,12 @@ run_01_tag_1_banner.txt       tag_1_djrs.dat                tag_1_pythia8.cmd   
 run_shower.sh                 tag_1_pts.dat                 tag_1_pythia8.log             unweighted_events.lhe.gz
 ```
 
-The `unweighted_events.lhe.gz` file is the [Les Houches event (LHE)](https://arxiv.org/abs/hep-ph/0609017) file, which is basically an xml file and it contains the four-momentum of initial state and final state particles. 
+    The `unweighted_events.lhe.gz` file is the [Les Houches event (LHE)](https://arxiv.org/abs/hep-ph/0609017) file, which is basically an xml file and it contains the four-momentum of initial state and final state particles. 
 
-       * The header part (between `<header>` and `</header>`) also contains all the MadGraph settings mentioned above (`run_card` and `parameter_card`).
+    1. The header part (between `<header>` and `</header>`) also contains all the MadGraph settings mentioned above (`run_card` and `parameter_card`).
 
 
-       * The `init` part contains information about the beam energy, PDF set and cross-section
+    2. The `init` part contains information about the beam energy, PDF set and cross-section
 ```
 <init>
 2212 2212 6.500000e+03 6.500000e+03 0 0 247000 247000 -4 1
@@ -282,7 +282,7 @@ The `unweighted_events.lhe.gz` file is the [Les Houches event (LHE)](https://arx
 </init>
 ```
 
-      * The `event` part contains all generated events. Each block of `<event>` and `</event>` is for one single event:
+    3. The `event` part contains all generated events. Each block of `<event>` and `</event>` is for one single event:
 ```
 <event>
  3      0 +1.9099000e+01 6.25000000e+01 7.54677100e-03 1.38763000e-01
@@ -292,7 +292,7 @@ The `unweighted_events.lhe.gz` file is the [Les Houches event (LHE)](https://arx
 </event>
 ```
 
-Here `3` means the event has 3 particles, showing in the 3 lines below. Each line is for one particle, which has information about the PDG ID, particle index and the four-momentum (`px, py, pz, E, mass`) and spin.
+    Here `3` means the event has 3 particles, showing in the 3 lines below. Each line is for one particle, which has information about the PDG ID, particle index and the four-momentum (`px, py, pz, E, mass`) and spin.
 
 
 #### $ gg \to H$ 
