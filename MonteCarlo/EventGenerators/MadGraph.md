@@ -132,7 +132,7 @@ Some third-party packages can be installed using the MG5_aMC shell command `inst
 
 ### Tutorials
 #### Drell-Yan $ pp \to \ell^{+} \ell^{-}$
-Process card: [proc_DrellYan.dat](EventGenerators/MadGraph/proc_DrellYan.dat)
+Process card: [proc_DrellYan.dat](./EventGenerators/MadGraph/proc_DrellYan.dat)
 
 * Import the theory model (the [FeynRules](https://feynrules.irmp.ucl.ac.be/) UFO model), which is the Standard Model in this case
 ```
@@ -263,6 +263,7 @@ After the above steps, MadGraph would calculate the cross-section and generate m
 ```
 
     * Events. 
+
 ```
 ls mg5/test_ggH/Events/run_01 
 run_01_tag_1_banner.txt       tag_1_djrs.dat                tag_1_pythia8.cmd             tag_1_pythia8_events.hepmc.gz
@@ -298,10 +299,10 @@ run_shower.sh                 tag_1_pts.dat                 tag_1_pythia8.log   
 
 #### $ gg \to H$ 
 
-Process card: [proc_ggH.dat](EventGenerators/MadGraph/proc_ggH.dat)
+Process card: [proc_ggH.dat](./EventGenerators/MadGraph/proc_ggH.dat)
 
 #### $e^{0}e^{+} \to ZH$
 
-Process card: [proc_ee_ZH.dat](EventGenerators/MadGraph/proc_ee_ZH.dat)
+Process card: [proc_ee_ZH.dat](./EventGenerators/MadGraph/proc_ee_ZH.dat)
 
 See the reference [2108.10261](https://arxiv.org/pdf/2108.10261.pdf) for the calcuation of lepton collisions in MadGraph.
