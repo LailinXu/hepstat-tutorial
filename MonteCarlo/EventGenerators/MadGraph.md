@@ -132,7 +132,7 @@ Some third-party packages can be installed using the MG5_aMC shell command `inst
 
 ### Tutorials
 #### Drell-Yan $ pp \to \ell^{+} \ell^{-}$
-Process card: [proc_DrellYan.dat](MonteCarlo/EventGenerators/MadGraph/proc_DrellYan.dat)
+Process card: [proc_DrellYan.dat](MadGraph/proc_DrellYan.dat)
 
 * Import the theory model (the [FeynRules](https://feynrules.irmp.ucl.ac.be/) UFO model), which is the Standard Model in this case
 ```
@@ -302,10 +302,10 @@ INFO: End survey
 
 #### $ gg \to H$ 
 
-Process card: [proc_ggH.dat](MonteCarlo/EventGenerators/MadGraph/proc_ggH.dat)
+Process card: [proc_ggH.dat](MadGraph/proc_ggH.dat)
 
 #### $e^{0}e^{+} \to ZH$
 
-Process card: [proc_ee_ZH.dat](MonteCarlo/EventGenerators/MadGraph/proc_ee_ZH.dat)
+Process card: [proc_ee_ZH.dat](MadGraph/proc_ee_ZH.dat)
 
 See the reference [2108.10261](https://arxiv.org/pdf/2108.10261.pdf) for the calcuation of lepton collisions in MadGraph.
