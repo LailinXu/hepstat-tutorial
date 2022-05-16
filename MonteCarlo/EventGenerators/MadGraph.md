@@ -223,11 +223,11 @@ Do you want to edit a card (press enter to bypass editing)?
 \------------------------------------------------------------/
 ```
 
-    * `param_card.dat`: change parameters for the model, like couplings, masses and widths of particles, etc
+         * `param_card.dat`: change parameters for the model, like couplings, masses and widths of particles, etc
 
-    * `run_card.dat`: change settings to control the process related calculations, like beam energies, PDF set, generator cuts, etc
+         * `run_card.dat`: change settings to control the process related calculations, like beam energies, PDF set, generator cuts, etc
 
-    * other cards that are related to third-party packages, like `pythia8_card.dat` etc.
+         * other cards that are related to third-party packages, like `pythia8_card.dat` etc.
 
 
 After finishing the settings, MadGraph would compile the source codes and run the calculation and event generation:
@@ -251,49 +251,53 @@ INFO: End survey
 ```
 
 * Results and outputs
-After the above steps, MadGraph would calculate the cross-section and generate matrix-element events. The former can be found either from the printout message or from the `crossx.html` in the output directory. The latter can be found under the `Event` directory.
 
+  After the above steps, MadGraph would calculate the cross-section and generate matrix-element events. The former can be found either from the printout message or from the `crossx.html` in the output directory. The latter can be found under the `Event` directory.
     * Cross-section
-```
-  === Results Summary for run: run_01 tag: tag_1 ===
+
+     ``` 
+    === Results Summary for run: run_01 tag: tag_1 ===
 
      Cumulative sequential time for this run: 1m57s
      Cross-section :   19.1 +- 0.05824 pb
      Nb of events :  1000
-```
+     ```
+   
+    * Events
 
-    * Events. 
-```
-ls mg5/test_ggH/Events/run_01 
-run_01_tag_1_banner.txt       tag_1_djrs.dat                tag_1_pythia8.cmd             tag_1_pythia8_events.hepmc.gz
-run_shower.sh                 tag_1_pts.dat                 tag_1_pythia8.log             unweighted_events.lhe.gz
-```
+     ```
+     ls mg5/test_ggH/Events/run_01 
+     run_01_tag_1_banner.txt       tag_1_djrs.dat                tag_1_pythia8.cmd             tag_1_pythia8_events.hepmc.gz
+     run_shower.sh                 tag_1_pts.dat                 tag_1_pythia8.log             unweighted_events.lhe.gz
+     ```
 
-    The `unweighted_events.lhe.gz` file is the [Les Houches event (LHE)](https://arxiv.org/abs/hep-ph/0609017) file, which is basically an xml file and it contains the four-momentum of initial state and final state particles. 
+     The `unweighted_events.lhe.gz` file is the [Les Houches event (LHE)](https://arxiv.org/abs/hep-ph/0609017) file, which is basically an xml file and it contains the four-momentum of initial state and final state particles. 
+        
+         * The header part (between `<header>` and `</header>`) also contains all the MadGraph settings mentioned above (`run_card` and `parameter_card`).
 
-    1. The header part (between `<header>` and `</header>`) also contains all the MadGraph settings mentioned above (`run_card` and `parameter_card`).
 
+         * The `init` part contains information about the beam energy, PDF set and cross-section
 
-    2. The `init` part contains information about the beam energy, PDF set and cross-section
-```
-<init>
-2212 2212 6.500000e+03 6.500000e+03 0 0 247000 247000 -4 1
-1.909900e+01 5.823500e-02 1.909900e+01 0
-<generator name='MadGraph5_aMC@NLO' version='3.3.2'>please cite 1405.0301 </generator>
-</init>
-```
+         ```
+         <init>
+        2212 2212 6.500000e+03 6.500000e+03 0 0 247000 247000 -4 1
+         1.909900e+01 5.823500e-02 1.909900e+01 0
+         <generator name='MadGraph5_aMC@NLO' version='3.3.2'>please cite 1405.0301 </generator>
+         </init>
+         ```
 
-    3. The `event` part contains all generated events. Each block of `<event>` and `</event>` is for one single event:
-```
-<event>
- 3      0 +1.9099000e+01 6.25000000e+01 7.54677100e-03 1.38763000e-01
-       21 -1    0    0  502  501 +0.0000000000e+00 +0.0000000000e+00 +4.9741077198e+02 4.9741077198e+02 0.0000000000e+00 0.0000e+00 1.0000e+00
-       21 -1    0    0  501  502 -0.0000000000e+00 -0.0000000000e+00 -7.8531672815e+00 7.8531672815e+00 0.0000000000e+00 0.0000e+00 1.0000e+00
-       25  1    1    2    0    0 +0.0000000000e+00 +0.0000000000e+00 +4.8955760470e+02 5.0526393926e+02 1.2500000000e+02 0.0000e+00 0.0000e+00
-</event>
-```
+         * The `event` part contains all generated events. Each block of `<event>` and `</event>` is for one single event:
 
-    Here `3` means the event has 3 particles, showing in the 3 lines below. Each line is for one particle, which has information about the PDG ID, particle index and the four-momentum (`px, py, pz, E, mass`) and spin.
+         ```
+         <event>
+          3      0 +1.9099000e+01 6.25000000e+01 7.54677100e-03 1.38763000e-01
+                21 -1    0    0  502  501 +0.0000000000e+00 +0.0000000000e+00 +4.9741077198e+02 4.9741077198e+02 0.0000000000e+00 0.0000e+00 1.0000e+00
+                21 -1    0    0  501  502 -0.0000000000e+00 -0.0000000000e+00 -7.8531672815e+00 7.8531672815e+00 0.0000000000e+00 0.0000e+00 1.0000e+00
+               25  1    1    2    0    0 +0.0000000000e+00 +0.0000000000e+00 +4.8955760470e+02 5.0526393926e+02 1.2500000000e+02 0.0000e+00 0.0000e+00
+         </event>
+         ```
+
+         Here `3` means the event has 3 particles, showing in the 3 lines below. Each line is for one particle, which has information about the PDG ID, particle index and the four-momentum (`px, py, pz, E, mass`) and spin.
 
 
 #### $ gg \to H$ 
