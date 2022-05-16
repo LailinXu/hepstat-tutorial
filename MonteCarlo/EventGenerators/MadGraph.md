@@ -229,6 +229,7 @@ Do you want to edit a card (press enter to bypass editing)?
 
     * other cards that are related to third-party packages, like `pythia8_card.dat` etc.
 
+
 After finishing the settings, MadGraph would compile the source codes and run the calculation and event generation:
 ```
 Generating 1000 events with run name run_01
