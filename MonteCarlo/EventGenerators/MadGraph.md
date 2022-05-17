@@ -8,6 +8,10 @@ From its [official website](https://launchpad.net/mg5amcnlo):
 > Processes can be simulated to LO accuracy for any user-defined Lagrangian, an the NLO accuracy in the case of models that support this kind of calculations
 > -- prominent among these are QCD and EW corrections to SM processes. Matrix elements at the tree- and one-loop-level can also be obtained.
 
+This tutorial has the following objectives:
+* Basic usages of MadGraph
+* Use MadGraph to do a simple calculation for $pp$ collisions and $e^{0}e^{+}$
+
 ## Useful resources
 
 This tutorial has multiple sections:
