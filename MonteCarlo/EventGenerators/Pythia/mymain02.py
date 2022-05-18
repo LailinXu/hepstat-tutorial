@@ -56,10 +56,13 @@ for iEvent in range(0, 100):
     fvy1 = pythia8.Vec4()
     fvy2 = pythia8.Vec4()
     fvyy = pythia8.Vec4()
+    # Loop all particles of the event
     for prt in pythia.event:
+        # Fill the histogram for Higgs boson mass
         if prt.statusAbs()==62 and prt.id()==25:
           print("Higgs mass", prt.m())
           h_m.fill(prt.m())
+        # Find leading and subleading photons
         if prt.isFinal() and prt.id()==22:
           if prt.pT() > pty1:
             pty1 = prt.pT()
@@ -74,7 +77,9 @@ for iEvent in range(0, 100):
             fvy2.pz(prt.pz())
             fvy2.e(prt.e())
     print("leading photon pt", pty1)
+    # Leading photon pt
     y1_pt.fill(pty1)
+    # DiPhoton invariant mass
     fvyy = fvy1 + fvy2
     h_myy.fill(fvyy.mCalc())
 # End of event loop. Statistics. Histogram. Done.
