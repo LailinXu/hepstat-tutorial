@@ -10,7 +10,7 @@ From its [official website](https://launchpad.net/mg5amcnlo):
 
 This tutorial has the following objectives:
 * Basic usages of MadGraph
-* Use MadGraph to do a simple calculation for $pp$ collisions and $e^{0}e^{+}$
+* Use MadGraph to do a simple calculation for $pp$ collisions and $e^{-}e^{+}$
 
 ## Useful resources
 
@@ -308,7 +308,7 @@ INFO: End survey
 
 Process card: [proc_ggH.dat](MadGraph/proc_ggH.dat)
 
-#### $e^{0}e^{+} \to ZH$
+#### $e^{-}e^{+} \to ZH$
 
 Process card: [proc_ee_ZH.dat](MadGraph/proc_ee_ZH.dat)
 
