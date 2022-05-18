@@ -46,6 +46,21 @@ As mentioned in the [MadGraph tutorial](MadGraph.md), the Mg5_aMC docker setup a
 
 For user applications, a steering macro (either in `C++` or `Python`) should be used. For a first run, here is a quick example: [mymain01.cc](Pythia/mymain01.cc) and [mymain01.py](Pythia/mymain01.py). The macro is used to generate charmonium states from $pp$ collisions at 8 TeV, and 100 events would be generated. A simple histogram is filled to plot the number of charged particles for all events.
 
+### How to run
+
+* Python
+```
+docker run --rm -it -v $PWD/mg5:/work -w /work  scailfin/madgraph5-amc-nlo:mg5_amc3.3.2  -c "python mymain01.py > main01_out_py.txt"
+```
+
+* C++
+
+The code needs to be compiled first.
+```
+docker run --rm -it -v $PWD/pythia:/work -w /work  scailfin/madgraph5-amc-nlo:mg5_amc3.3.2  -c "g++ mymain01.cc -o mymain01 -I/usr/local/venv/include  -L/usr/local/venv/lib -lpythia8 -L -lboost_iostreams -L./ -lz -ldl; ./mymain01 > out_mymain01.txt"
+```
+
+### Walkthrough of the code
 1. Initialization
 
 ```
@@ -165,3 +180,14 @@ See the Python macro [mymain02.py](Pythia/mymain02.py)
 
 ### Only parton showering
 See the `C++` macro [mymain02.cc](Pythia/mymain02.cc)
+
+```
+docker run --rm -it -v $PWD/pythia:/work -w /work  scailfin/madgraph5-amc-nlo:mg5_amc3.3.2  -c "g++ mymain02.cc -o mymain02 -I/usr/local/venv/include  -L/usr/local/venv/lib -lpythia8 -L -lboost_iostreams -L./ -lz -ldl; ./mymain02 > out_mymain02.txt"
+```
+
+#### Interface to HepMC
+To save the pythin event records to an output file, like HepMC.
+See the `C++` macro [mymain03.cc](Pythia/mymain03.cc)
+```
+docker run --rm -it -v $PWD/pythia:/work -w /work  scailfin/madgraph5-amc-nlo:mg5_amc3.3.2  -c "g++ mymain03.cc -o mymain03 -I/usr/local/venv/include  -L/usr/local/venv/lib -lpythia8 -lHepMC -L -lboost_iostreams -L./ -lz -ldl; ./mymain03 > out_mymain03.txt"
+```
