@@ -14,11 +14,19 @@
 import pythia8
 
 pythia = pythia8.Pythia()
+
+# Process setup
+## Charmonium production
 print(pythia.settings.fvec("Charmonium:gg2ccbar(3S1)[3S1(8)]g"))
+# Beam setup
+## energy
 pythia.readString("Beams:eCM = 8000.")
+# QCD interactions
 pythia.readString("HardQCD:all = on")
+# Phase space cuts
 pythia.readString("PhaseSpace:pTHatMin = 20.")
 pythia.init()
+# Histograms
 mult = pythia8.Hist("charged multiplicity", 100, -0.5, 799.5)
 # Begin event loop. Generate event. Skip if error. List first one.
 for iEvent in range(0, 100):
